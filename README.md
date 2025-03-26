@@ -1,2 +1,2 @@
-# FocusGuard
-A minimalist app to reduce distractions by modifying app icons and limiting app usage time.
+# Roblocks
+A mobile app for learning AI & IoT with drag-and-drop block coding and wireless deployment.
