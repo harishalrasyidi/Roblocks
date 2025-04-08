@@ -1,0 +1,106 @@
+<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+  <category name="Logic" colour="%{BKY_LOGIC_HUE}">
+    <block type="controls_if"></block>
+    <block type="logic_compare"></block>
+    <block type="logic_operation"></block>
+    <block type="logic_negate"></block>
+    <block type="logic_boolean"></block>
+  </category>
+  <category name="Loops" colour="%{BKY_LOOPS_HUE}">
+    <block type="controls_repeat_ext">
+      <value name="TIMES">
+        <shadow type="math_number">
+          <field name="NUM">10</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="controls_whileUntil"></block>
+    <block type="controls_for">
+      <value name="FROM">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+      <value name="TO">
+        <shadow type="math_number">
+          <field name="NUM">10</field>
+        </shadow>
+      </value>
+      <value name="BY">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+    </block>
+  </category>
+  <category name="Math" colour="%{BKY_MATH_HUE}">
+    <block type="math_number">
+      <field name="NUM">123</field>
+    </block>
+    <block type="math_arithmetic">
+      <value name="A">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+      <value name="B">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="math_random_int">
+      <value name="FROM">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+      <value name="TO">
+        <shadow type="math_number">
+          <field name="NUM">100</field>
+        </shadow>
+      </value>
+    </block>
+  </category>
+  <category name="Variables" custom="VARIABLE" colour="%{BKY_VARIABLES_HUE}">
+  </category>
+  <category name="Functions" custom="PROCEDURE" colour="%{BKY_PROCEDURES_HUE}">
+  </category>
+  <category name="IoT" colour="120">
+    <block type="iot_led_control">
+      <value name="PIN">
+        <shadow type="math_number">
+          <field name="NUM">13</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="iot_sensor_read">
+      <value name="PIN">
+        <shadow type="math_number">
+          <field name="NUM">0</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="iot_delay">
+      <value name="DELAY">
+        <shadow type="math_number">
+          <field name="NUM">1000</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="iot_serial_print">
+      <value name="TEXT">
+        <shadow type="text">
+          <field name="TEXT">Hello, world!</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="iot_set_pin_mode">
+      <value name="PIN">
+        <shadow type="math_number">
+          <field name="NUM">13</field>
+        </shadow>
+      </value>
+    </block>
+  </category>
+</xml> 

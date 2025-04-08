@@ -37,7 +37,6 @@ android {
     }
 }
 
-
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -59,6 +58,13 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    // Use an alternative block programming library compatible with Compose
+    // We'll use WebView with Blockly JS instead of native Android-Blockly
+    implementation("androidx.webkit:webkit:1.8.0")
+    
+    // Google Sign In
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

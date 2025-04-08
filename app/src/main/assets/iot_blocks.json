@@ -1,0 +1,98 @@
+[
+  {
+    "type": "iot_led_control",
+    "message0": "LED on pin %1 set to %2",
+    "args0": [
+      {
+        "type": "input_value",
+        "name": "PIN",
+        "check": "Number"
+      },
+      {
+        "type": "field_dropdown",
+        "name": "STATE",
+        "options": [
+          ["ON", "HIGH"],
+          ["OFF", "LOW"]
+        ]
+      }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 120,
+    "tooltip": "Control an LED connected to a digital pin",
+    "helpUrl": ""
+  },
+  {
+    "type": "iot_sensor_read",
+    "message0": "Read analog sensor on pin %1",
+    "args0": [
+      {
+        "type": "input_value",
+        "name": "PIN",
+        "check": "Number"
+      }
+    ],
+    "output": "Number",
+    "colour": 230,
+    "tooltip": "Read value from an analog sensor",
+    "helpUrl": ""
+  },
+  {
+    "type": "iot_delay",
+    "message0": "Wait for %1 milliseconds",
+    "args0": [
+      {
+        "type": "input_value",
+        "name": "DELAY",
+        "check": "Number"
+      }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 65,
+    "tooltip": "Pause execution for a specified amount of time",
+    "helpUrl": ""
+  },
+  {
+    "type": "iot_serial_print",
+    "message0": "Print to serial: %1",
+    "args0": [
+      {
+        "type": "input_value",
+        "name": "TEXT",
+        "check": ["String", "Number", "Boolean"]
+      }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 160,
+    "tooltip": "Send data to the Serial Monitor",
+    "helpUrl": ""
+  },
+  {
+    "type": "iot_set_pin_mode",
+    "message0": "Set pin %1 mode to %2",
+    "args0": [
+      {
+        "type": "input_value",
+        "name": "PIN",
+        "check": "Number"
+      },
+      {
+        "type": "field_dropdown",
+        "name": "MODE",
+        "options": [
+          ["OUTPUT", "OUTPUT"],
+          ["INPUT", "INPUT"],
+          ["INPUT_PULLUP", "INPUT_PULLUP"]
+        ]
+      }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 20,
+    "tooltip": "Configure a pin as input or output",
+    "helpUrl": ""
+  }
+] 

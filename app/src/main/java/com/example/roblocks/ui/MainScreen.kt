@@ -23,7 +23,9 @@ import androidx.compose.ui.unit.*
 import com.example.roblocks.R
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onIotClick: () -> Unit = {}
+) {
     val selectedIndex = remember { mutableStateOf(0) }
 
     Scaffold(
@@ -79,7 +81,7 @@ fun MainScreen() {
                         icon = R.drawable.ic_robot,
                         title = "Robotic /IoT",
                         backgroundColor = Color(0xFFFFC107),
-                        onClick = { /* Handle IoT click */ }
+                        onClick = onIotClick
                     )
                 }
                 item {

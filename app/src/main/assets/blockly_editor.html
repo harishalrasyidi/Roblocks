@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Blockly for IoT</title>
+    
+    <!-- Tambahkan versi offline dari Blockly library -->
+    <script>
+        // Log ke Android untuk debugging
+        function logToAndroid(message) {
+            try {
+                if (window.AndroidInterface && typeof AndroidInterface.log === 'function') {
+                    AndroidInterface.log(message);
+                }
+                console.log(message);
+            } catch (e) {
+                console.error("Error logging to Android:", e);
+            }
+        }
+        
+        // Log saat HTML dimuat
+        window.onload = function() {
+            logToAndroid("HTML document loaded");
+        };
+    </script>
+    
+    <!-- Gunakan CDN dengan fallback ke versi offline -->
+    <script>
+        function loadScript(src, callback) {
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = src;
+            script.onload = callback;
+            script.onerror = function() {
+                logToAndroid("Failed to load script: " + src);
+                // Jika CDN gagal, load fallback lokal (jika tersedia)
+                if (src.startsWith('https://')) {
+                    var localSrc = src.replace('https://unpkg.com/blockly/', 'blockly/');
+                    logToAndroid("Trying local fallback: " + localSrc);
+                    loadScript(localSrc, callback);
+                }
+            };
+            document.head.appendChild(script);
+        }
+        
+        // Chain loading scripts in order
+        loadScript('https://unpkg.com/blockly/blockly.min.js', function() {
+            logToAndroid("Blockly core loaded");
+            loadScript('https://unpkg.com/blockly/blocks_compressed.js', function() {
+                logToAndroid("Blocks loaded");
+                loadScript('https://unpkg.com/blockly/javascript_compressed.js', function() {
+                    logToAndroid("JavaScript generator loaded");
+                    loadScript('https://unpkg.com/blockly/msg/en.js', function() {
+                        logToAndroid("Language loaded");
+                        // Inisialisasi Blockly secara manual
+                        logToAndroid("All scripts loaded, initializing Blockly");
+                        if (typeof initBlocklyWithDefault === 'function') {
+                            initBlocklyWithDefault();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        #blocklyArea {
+            height: 100%;
+            width: 100%;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #blocklyDiv {
+            flex-grow: 1;
+            width: 100%;
+        }
+        
+        .blocklyToolboxDiv {
+            background-color: #f0f0f0;
+        }
+        
+        #status {
+            padding: 5px;
+            background-color: #333;
+            color: white;
+            font-family: sans-serif;
+            font-size: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="blocklyArea">
+        <div id="status">Loading Blockly...</div>
+        <div id="blocklyDiv"></div>
+    </div>
+
+    <script>
+        var workspace;
+        
+        // Log message to status bar
+        function updateStatus(message) {
+            var statusDiv = document.getElementById('status');
+            if (statusDiv) {
+                statusDiv.textContent = message;
+                logToAndroid(message);
+            }
+        }
+        
+        // Custom blocks for IoT
+        function defineCustomBlocks() {
+            if (!Blockly || !Blockly.Blocks) {
+                updateStatus("Blockly not loaded yet. Cannot define custom blocks.");
+                return;
+            }
+            
+            updateStatus("Defining custom blocks...");
+            
+            // LED control block
+            Blockly.Blocks['iot_led_control'] = {
+                init: function() {
+                    this.appendValueInput('PIN')
+                        .setCheck('Number')
+                        .appendField('LED on pin');
+                    this.appendDummyInput()
+                        .appendField('set to')
+                        .appendField(new Blockly.FieldDropdown([
+                            ['ON', 'HIGH'],
+                            ['OFF', 'LOW']
+                        ]), 'STATE');
+                    this.setPreviousStatement(true, null);
+                    this.setNextStatement(true, null);
+                    this.setColour(120);
+                    this.setTooltip('Control an LED connected to a digital pin');
+                }
+            };
+
+            // Sensor read block
+            Blockly.Blocks['iot_sensor_read'] = {
+                init: function() {
+                    this.appendValueInput('PIN')
+                        .setCheck('Number')
+                        .appendField('Read analog sensor on pin');
+                    this.setOutput(true, 'Number');
+                    this.setColour(230);
+                    this.setTooltip('Read value from an analog sensor');
+                }
+            };
+
+            // Delay block
+            Blockly.Blocks['iot_delay'] = {
+                init: function() {
+                    this.appendValueInput('DELAY')
+                        .setCheck('Number')
+                        .appendField('Wait for');
+                    this.appendDummyInput()
+                        .appendField('milliseconds');
+                    this.setPreviousStatement(true, null);
+                    this.setNextStatement(true, null);
+                    this.setColour(65);
+                    this.setTooltip('Pause execution for a specified amount of time');
+                }
+            };
+
+            // Serial print block
+            Blockly.Blocks['iot_serial_print'] = {
+                init: function() {
+                    this.appendValueInput('TEXT')
+                        .appendField('Print to serial:');
+                    this.setPreviousStatement(true, null);
+                    this.setNextStatement(true, null);
+                    this.setColour(160);
+                    this.setTooltip('Send data to the Serial Monitor');
+                }
+            };
+
+            // Pin mode block
+            Blockly.Blocks['iot_set_pin_mode'] = {
+                init: function() {
+                    this.appendValueInput('PIN')
+                        .setCheck('Number')
+                        .appendField('Set pin');
+                    this.appendDummyInput()
+                        .appendField('mode to')
+                        .appendField(new Blockly.FieldDropdown([
+                            ['OUTPUT', 'OUTPUT'],
+                            ['INPUT', 'INPUT'],
+                            ['INPUT_PULLUP', 'INPUT_PULLUP']
+                        ]), 'MODE');
+                    this.setPreviousStatement(true, null);
+                    this.setNextStatement(true, null);
+                    this.setColour(20);
+                    this.setTooltip('Configure a pin as input or output');
+                }
+            };
+            
+            updateStatus("Custom blocks defined");
+        }
+        
+        // Define code generators
+        function defineCodeGenerators() {
+            if (!Blockly || !Blockly.JavaScript) {
+                updateStatus("JavaScript generator not loaded yet");
+                return;
+            }
+            
+            updateStatus("Defining code generators...");
+            
+            // LED control
+            Blockly.JavaScript['iot_led_control'] = function(block) {
+                var pin = Blockly.JavaScript.valueToCode(block, 'PIN', Blockly.JavaScript.ORDER_ATOMIC) || '13';
+                var state = block.getFieldValue('STATE');
+                return 'digitalWrite(' + pin + ', ' + state + ');\n';
+            };
+
+            // Analog read
+            Blockly.JavaScript['iot_sensor_read'] = function(block) {
+                var pin = Blockly.JavaScript.valueToCode(block, 'PIN', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+                return ['analogRead(' + pin + ')', Blockly.JavaScript.ORDER_ATOMIC];
+            };
+
+            // Delay
+            Blockly.JavaScript['iot_delay'] = function(block) {
+                var delay = Blockly.JavaScript.valueToCode(block, 'DELAY', Blockly.JavaScript.ORDER_ATOMIC) || '1000';
+                return 'delay(' + delay + ');\n';
+            };
+
+            // Serial print
+            Blockly.JavaScript['iot_serial_print'] = function(block) {
+                var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '\"\"';
+                return 'Serial.println(' + text + ');\n';
+            };
+
+            // Pin mode
+            Blockly.JavaScript['iot_set_pin_mode'] = function(block) {
+                var pin = Blockly.JavaScript.valueToCode(block, 'PIN', Blockly.JavaScript.ORDER_ATOMIC) || '13';
+                var mode = block.getFieldValue('MODE');
+                return 'pinMode(' + pin + ', ' + mode + ');\n';
+            };
+            
+            updateStatus("Code generators defined");
+        }
+
+        // Initialize Blockly with default toolbox if no XML provided
+        function initBlocklyWithDefault() {
+            // Define custom blocks and generators
+            defineCustomBlocks();
+            defineCodeGenerators();
+            
+            // Default toolbox
+            var defaultToolbox = '<xml>' +
+                '<category name="Logic" colour="%{BKY_LOGIC_HUE}">' +
+                '<block type="controls_if"></block>' +
+                '<block type="logic_compare"></block>' +
+                '<block type="logic_operation"></block>' +
+                '</category>' +
+                '<category name="Loops" colour="%{BKY_LOOPS_HUE}">' +
+                '<block type="controls_repeat_ext"></block>' +
+                '<block type="controls_whileUntil"></block>' +
+                '</category>' +
+                '<category name="IoT" colour="120">' +
+                '<block type="iot_led_control"><value name="PIN"><shadow type="math_number"><field name="NUM">13</field></shadow></value></block>' +
+                '<block type="iot_sensor_read"><value name="PIN"><shadow type="math_number"><field name="NUM">0</field></shadow></value></block>' +
+                '<block type="iot_delay"><value name="DELAY"><shadow type="math_number"><field name="NUM">1000</field></shadow></value></block>' +
+                '<block type="iot_serial_print"><value name="TEXT"><shadow type="text"><field name="TEXT">Hello Arduino</field></shadow></value></block>' +
+                '</category>' +
+                '</xml>';
+            
+            initBlockly(defaultToolbox);
+        }
+        
+        // Initialize Blockly with provided toolbox
+        function initBlockly(toolboxXml) {
+            updateStatus("Initializing workspace...");
+            
+            if (!Blockly || !Blockly.inject) {
+                updateStatus("ERROR: Blockly not fully loaded!");
+                return;
+            }
+            
+            try {
+                // Create the workspace
+                workspace = Blockly.inject('blocklyDiv', {
+                    toolbox: toolboxXml,
+                    grid: {
+                        spacing: 20,
+                        length: 3,
+                        colour: '#ccc',
+                        snap: true
+                    },
+                    zoom: {
+                        controls: true,
+                        wheel: true,
+                        startScale: 1.0,
+                        maxScale: 3,
+                        minScale: 0.3,
+                        scaleSpeed: 1.2
+                    },
+                    trashcan: true
+                });
+                
+                updateStatus("Workspace initialized!");
+                
+                // Hide status bar after successful load
+                setTimeout(function() {
+                    var statusDiv = document.getElementById('status');
+                    if (statusDiv) {
+                        statusDiv.style.display = 'none';
+                    }
+                }, 1000);
+                
+                // Add change listener to detect workspace changes
+                workspace.addChangeListener(function(event) {
+                    if (event.type == Blockly.Events.BLOCK_MOVE ||
+                        event.type == Blockly.Events.BLOCK_CHANGE ||
+                        event.type == Blockly.Events.BLOCK_CREATE ||
+                        event.type == Blockly.Events.BLOCK_DELETE) {
+                        
+                        var xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace));
+                        try {
+                            // Send workspace XML to Android
+                            if (window.AndroidInterface) {
+                                AndroidInterface.onWorkspaceChange(xml);
+                            }
+                        } catch (e) {
+                            console.log('Error sending workspace to Android:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                updateStatus("ERROR initializing Blockly: " + e.message);
+                console.error(e);
+            }
+        }
+        
+        // Generate Arduino code from blocks
+        function generateCode() {
+            updateStatus("Generating code...");
+            try {
+                if (!workspace) {
+                    updateStatus("No workspace available!");
+                    return "";
+                }
+                
+                var code = Blockly.JavaScript.workspaceToCode(workspace);
+                
+                // Send generated code to Android
+                if (window.AndroidInterface) {
+                    AndroidInterface.onCodeGenerated(code);
+                    updateStatus("Code sent to Android");
+                } else {
+                    updateStatus("AndroidInterface not available");
+                    console.log("Generated code:", code);
+                }
+                
+                return code;
+            } catch (e) {
+                updateStatus("Error generating code: " + e.message);
+                console.error(e);
+                return "";
+            }
+        }
+        
+        // Load a saved workspace
+        function loadWorkspace(xml) {
+            updateStatus("Loading workspace...");
+            try {
+                if (!workspace) {
+                    updateStatus("No workspace available!");
+                    return;
+                }
+                
+                var dom = Blockly.Xml.textToDom(xml);
+                Blockly.Xml.clearWorkspaceAndLoadFromXml(dom, workspace);
+                updateStatus("Workspace loaded successfully");
+            } catch (e) {
+                updateStatus("Error loading workspace: " + e.message);
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html> 
