@@ -1,6 +1,5 @@
 package com.example.roblocks.ui
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,21 +24,19 @@ import androidx.navigation.NavController
 import com.example.roblocks.R
 
 @Composable
-fun RoboticsScreen(navController: NavController) {
-
-    val selectedIndex = remember { mutableStateOf(2) }
+fun LearnScreen(navController: NavController) {
+    val selectedIndex = remember { mutableStateOf(3) }
 
     Scaffold(
-        bottomBar ={
+        bottomBar = {
             BottomNavBar(
                 selectedIndex = selectedIndex.value,
-                onItemSelected = {
-                        index ->
-                    when(index){
+                onItemSelected = { index ->
+                    when (index) {
                         0 -> navController.navigate("main_screen")
                         1 -> navController.navigate("artificial_intelligence_screen")
-                        2 -> {}
-                        3 -> navController.navigate("learn_screen")
+                        2 -> navController.navigate("robotics_screen")
+                        3 -> {}
                         4 -> navController.navigate("profile_screen")
                     }
                 }
@@ -54,20 +51,7 @@ fun RoboticsScreen(navController: NavController) {
                 .padding(20.dp)
         ) {
             Text("Halaman,", color = Color.Gray)
-            Text("Robotics/IOT", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            //tambah kondisi jadi ada list project waktu DAO udah beres
-            ProjectCard("Project Robotics/IOT", false)
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            ArticleCard(
-                icon = R.drawable.ic_buku,
-                title = "Learn",
-                description = "Pelajari Tentang Robotika dan Internet Of Things"
-            )
+            Text("Learn", fontWeight = FontWeight.Bold, fontSize = 20.sp)
         }
     }
 }

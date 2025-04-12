@@ -30,9 +30,19 @@ fun ArtificialIntelligenceScreen(navController: NavController) {
 
     Scaffold(
         bottomBar = {
-            BottomNavBar(selectedIndex = selectedIndex.value) {
-                selectedIndex.value = it
-            }
+            BottomNavBar(
+                selectedIndex = selectedIndex.value,
+                onItemSelected = {
+                        index ->
+                    when(index){
+                        0 -> navController.navigate("main_screen")
+                        1 -> {}
+                        2 -> navController.navigate("robotics_screen")
+                        3 -> navController.navigate("learn_screen")
+                        4 -> navController.navigate("profile_screen")
+                    }
+                }
+            )
         },
         containerColor = Color(0xFFF9F9FF)
     ) { innerPadding ->

@@ -16,7 +16,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
+import androidx.navigation.NavController
 import com.example.roblocks.R
+import com.example.roblocks.ui.theme.navBarIconActive
+import com.example.roblocks.ui.theme.navBarIconActiveSurrounding
 
 @Composable
 fun BottomNavBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
@@ -36,7 +39,7 @@ fun BottomNavBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
         items.forEachIndexed { index, icon ->
             val selected = selectedIndex == index
             val backgroundColor by animateColorAsState(
-                targetValue = if (selected) Color(0xFFFAD8FF) else Color.Transparent,
+                targetValue = if (selected) navBarIconActiveSurrounding else Color.Transparent,
                 label = ""
             )
 
@@ -54,7 +57,7 @@ fun BottomNavBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
                     Icon(
                         icon,
                         contentDescription = null,
-                        tint = if (selected) Color(0xFFCC4BC2) else Color.Black
+                        tint = if (selected) navBarIconActive else Color.Black,
                     )
                 } else {
                     Image(
@@ -64,6 +67,7 @@ fun BottomNavBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
                     )
                 }
             }
+
         }
     }
 }

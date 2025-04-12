@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -41,11 +42,11 @@ fun ArticleCard(
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Image(
+                Icon(
                     painter = painterResource(icon),
                     contentDescription = null,
                     modifier = Modifier.size(50.dp).clip(RoundedCornerShape(50)),
-                    contentScale = ContentScale.Fit
+                    tint = Color.White
                 )
 
                 Text(
