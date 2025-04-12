@@ -29,12 +29,12 @@ fun TrackProgressCard() {
             modifier = Modifier.fillMaxSize()
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_buku),
+                painter = painterResource(id = R.drawable.track_progress_ilustration),
                 contentDescription = "Robot Image",
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
+                    .align(Alignment.CenterEnd)
                     .size(100.dp)
-                    .offset(x = (-10).dp, y = (-30).dp)
+                    .offset(x = (-10).dp, y = (-20).dp)
             )
 
             Column(
@@ -44,18 +44,25 @@ fun TrackProgressCard() {
             ) {
                 Text(
                     text = "Track\nYour Progress",
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    style = MaterialTheme.typography.bodyMedium.copy(
                         color = Color.White,
-                        fontSize = 20.sp,
+                        fontSize = 30.sp,
                         lineHeight = 28.sp
-                    )
+                    ),
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = { /* TODO: Navigate */ },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D6FFF))
                 ) {
-                    Text("CHECKNOW")
+                    Text("CHECKNOW",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            lineHeight = 28.sp
+                        ),
+                        fontWeight = FontWeight.Bold)
                 }
             }
         }

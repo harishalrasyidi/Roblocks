@@ -20,10 +20,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import androidx.navigation.NavController
 import com.example.roblocks.R
 
 @Composable
-fun MainScreen() {
+fun MainScreen(navController: NavController) {
     val selectedIndex = remember { mutableStateOf(0) }
 
     Scaffold(
@@ -70,7 +71,7 @@ fun MainScreen() {
                         icon = R.drawable.ic_ai,
                         title = "Artificial Intelligence",
                         backgroundColor = Color(0xFF3366FF),
-                        onClick = { /* Handle AI click */ }
+                        onClick = { navController.navigate("artificial_intelligence_screen") }
                     )
                 }
                 item {
@@ -79,7 +80,7 @@ fun MainScreen() {
                         icon = R.drawable.ic_robot,
                         title = "Robotic /IoT",
                         backgroundColor = Color(0xFFFFC107),
-                        onClick = { /* Handle IoT click */ }
+                        onClick = { navController.navigate("robotics_screen")}
                     )
                 }
                 item {
