@@ -27,18 +27,28 @@ import com.example.roblocks.R
 fun MainScreen(navController: NavController) {
     val selectedIndex = remember { mutableStateOf(0) }
 
+    // Only one Scaffold should be used here
     Scaffold(
         bottomBar = {
             BottomNavBar(selectedIndex = selectedIndex.value) {
                 selectedIndex.value = it
+                // Handle navigation based on the selected index
+                when (it) {
+                    0 -> navController.navigate("main_screen")
+                    1 -> navController.navigate("artificial_intelligence_screen")
+                    2 -> navController.navigate("robotics_screen")
+                    3 -> navController.navigate("learn_screen")
+                    4 -> navController.navigate("profile_screen")
+                }
             }
         },
         containerColor = Color(0xFFF9F9FF)
     ) { innerPadding ->
+        // Ensure this layout is inside the single Scaffold and padding is applied correctly
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding)  // Padding from Scaffold
                 .padding(20.dp)
         ) {
             Text("Hello,", color = Color.Gray)
@@ -80,7 +90,7 @@ fun MainScreen(navController: NavController) {
                         icon = R.drawable.ic_robot,
                         title = "Robotic /IoT",
                         backgroundColor = Color(0xFFFFC107),
-                        onClick = { navController.navigate("robotics_screen")}
+                        onClick = { navController.navigate("robotics_screen") }
                     )
                 }
                 item {
@@ -105,3 +115,4 @@ fun MainScreen(navController: NavController) {
         }
     }
 }
+
