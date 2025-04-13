@@ -26,5 +26,5 @@ abstract class AppDatabase : RoomDatabase() {
 //    abstract fun questionDao(): QuestionDao
 //    abstract fun userProgressDao(): UserProgressDao
 //    abstract fun projectAIDao(): ProjectAIDao
-//    abstract fun projectIOTDao(): ProjectIOTDao
+    abstract fun projectIOTDao(): ProjectIOTDao
 }
