@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Roblocks - BlocklyDuino</title>
+    
+    <!-- Injecting BlocklyDuino files -->
+    <script src="./BlocklyDuino/blockly/blockly_compressed.js"></script>
+    <script src="./BlocklyDuino/blockly/blocks_compressed.js"></script>
+    <script src="./BlocklyDuino/blockly/arduino_compressed.js"></script>
+    <script src="./BlocklyDuino/blockly/msg/js/en.js"></script>
+    
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        #blocklyDiv {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .action-button {
+            position: absolute;
+            bottom: 20px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            color: white;
+            z-index: 1000;
+            cursor: pointer;
+        }
+        
+        #previewButton {
+            right: 170px;
+            background-color: #673AB7;
+        }
+        
+        #saveButton {
+            right: 20px;
+            background-color: #4285F4;
+        }
+        
+        #previewModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 700px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .code-container {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 400px;
+            margin-bottom: 15px;
+        }
+        
+        .close-button {
+            padding: 8px 16px;
+            background-color: #673AB7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <div id="blocklyDiv"></div>
+    <button id="previewButton" class="action-button">Preview Code</button>
+    <button id="saveButton" class="action-button">Save</button>
+    
+    <!-- Code Preview Modal -->
+    <div id="previewModal">
+        <div class="modal-content">
+            <div class="modal-title">Arduino Code Preview</div>
+            <pre id="codeContainer" class="code-container"></pre>
+            <button id="closePreview" class="close-button">Close</button>
+        </div>
+    </div>
+    
+    <!-- Define toolbox -->
+    <xml id="toolbox" style="display: none">
+        <category name="Logic" colour="#5b80a5">
+            <block type="controls_if"></block>
+            <block type="logic_compare">
+                <field name="OP">EQ</field>
+            </block>
+            <block type="logic_operation">
+                <field name="OP">AND</field>
+            </block>
+            <block type="logic_negate"></block>
+            <block type="logic_boolean"></block>
+            <block type="logic_ternary"></block>
+        </category>
+        
+        <category name="Loops" colour="#5ba55b">
+            <block type="controls_repeat_ext">
+                <value name="TIMES">
+                    <shadow type="math_number">
+                        <field name="NUM">10</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="controls_whileUntil">
+                <field name="MODE">WHILE</field>
+            </block>
+            <block type="controls_for">
+                <field name="VAR">i</field>
+                <value name="FROM">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+                <value name="TO">
+                    <shadow type="math_number">
+                        <field name="NUM">10</field>
+                    </shadow>
+                </value>
+                <value name="BY">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="controls_flow_statements">
+                <field name="FLOW">BREAK</field>
+            </block>
+        </category>
+        
+        <category name="Math" colour="#5b67a5">
+            <block type="math_number">
+                <field name="NUM">0</field>
+            </block>
+            <block type="math_arithmetic">
+                <field name="OP">ADD</field>
+                <value name="A">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+                <value name="B">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="math_random_int">
+                <value name="FROM">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+                <value name="TO">
+                    <shadow type="math_number">
+                        <field name="NUM">100</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="math_constrain">
+                <value name="VALUE">
+                    <shadow type="math_number">
+                        <field name="NUM">50</field>
+                    </shadow>
+                </value>
+                <value name="LOW">
+                    <shadow type="math_number">
+                        <field name="NUM">0</field>
+                    </shadow>
+                </value>
+                <value name="HIGH">
+                    <shadow type="math_number">
+                        <field name="NUM">100</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="math_modulo">
+                <value name="DIVIDEND">
+                    <shadow type="math_number">
+                        <field name="NUM">10</field>
+                    </shadow>
+                </value>
+                <value name="DIVISOR">
+                    <shadow type="math_number">
+                        <field name="NUM">2</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="math_round"></block>
+        </category>
+        
+        <category name="Text" colour="#5ba58c">
+            <block type="text"></block>
+            <block type="text_join"></block>
+            <block type="text_append">
+                <value name="TEXT">
+                    <shadow type="text"></shadow>
+                </value>
+            </block>
+            <block type="text_length">
+                <value name="VALUE">
+                    <shadow type="text">
+                        <field name="TEXT">abc</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="text_isEmpty">
+                <value name="VALUE">
+                    <shadow type="text">
+                        <field name="TEXT"></field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="text_indexOf">
+                <value name="VALUE">
+                    <shadow type="text">
+                        <field name="TEXT">abcdefg</field>
+                    </shadow>
+                </value>
+                <value name="FIND">
+                    <shadow type="text">
+                        <field name="TEXT">c</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
+        
+        <category name="Variables" colour="#a55b80" custom="VARIABLE"></category>
+        
+        <category name="Functions" colour="#995ba5" custom="PROCEDURE"></category>
+        
+        <category name="IO" colour="#a5745b">
+            <block type="io_digitalwrite">
+                <value name="PIN">
+                    <shadow type="math_number">
+                        <field name="NUM">13</field>
+                    </shadow>
+                </value>
+                <value name="STATE">
+                    <shadow type="io_highlow">
+                        <field name="STATE">HIGH</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="io_digitalread">
+                <value name="PIN">
+                    <shadow type="math_number">
+                        <field name="NUM">2</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="io_builtin_led">
+                <value name="STATE">
+                    <shadow type="io_highlow">
+                        <field name="STATE">HIGH</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="io_analogwrite">
+                <value name="PIN">
+                    <shadow type="math_number">
+                        <field name="NUM">3</field>
+                    </shadow>
+                </value>
+                <value name="VALUE">
+                    <shadow type="math_number">
+                        <field name="NUM">128</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="io_analogread">
+                <value name="PIN">
+                    <shadow type="math_number">
+                        <field name="NUM">A0</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="io_highlow"></block>
+        </category>
+        
+        <category name="Time" colour="#5ba58c">
+            <block type="time_delay">
+                <value name="DELAY_TIME_MILI">
+                    <shadow type="math_number">
+                        <field name="NUM">1000</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="time_delaymicros">
+                <value name="DELAY_TIME_MICRO">
+                    <shadow type="math_number">
+                        <field name="NUM">100</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="time_millis"></block>
+            <block type="time_micros"></block>
+        </category>
+        
+        <category name="Serial" colour="#00979D">
+            <block type="serial_begin">
+                <value name="CONTENT">
+                    <shadow type="math_number">
+                        <field name="NUM">9600</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="serial_print">
+                <value name="CONTENT">
+                    <shadow type="text">
+                        <field name="TEXT">Hello World</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="serial_println">
+                <value name="CONTENT">
+                    <shadow type="text">
+                        <field name="TEXT">Hello World</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="serial_available"></block>
+            <block type="serial_read"></block>
+        </category>
+    </xml>
+    
+    <script>
+        // Initialize Blockly
+        var workspace = Blockly.inject('blocklyDiv', {
+            toolbox: document.getElementById('toolbox'),
+            grid: {spacing: 20, length: 3, colour: '#ccc', snap: true},
+            trashcan: true,
+            zoom: {
+                controls: true,
+                wheel: true,
+                startScale: 1.0,
+                maxScale: 3,
+                minScale: 0.3,
+                scaleSpeed: 1.2
+            }
+        });
+        
+        // Preview modal elements
+        var previewModal = document.getElementById('previewModal');
+        var codeContainer = document.getElementById('codeContainer');
+        var closePreviewBtn = document.getElementById('closePreview');
+        
+        // Preview button event handler
+        document.getElementById('previewButton').addEventListener('click', function() {
+            try {
+                // Generate Arduino code
+                var code = Blockly.Arduino.workspaceToCode(workspace);
+                
+                // Display code in the modal
+                codeContainer.textContent = code;
+                previewModal.style.display = 'block';
+                
+                // Send to Android
+                if (window.BlocklyBridge) {
+                    var xml = Blockly.Xml.workspaceToDom(workspace);
+                    var xmlText = Blockly.Xml.domToText(xml);
+                    window.BlocklyBridge.saveWorkspace(xmlText, code);
+                }
+            } catch (e) {
+                console.error("Error generating code:", e);
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.logMessage("Error: " + e.message);
+                }
+            }
+        });
+        
+        // Close preview modal
+        closePreviewBtn.addEventListener('click', function() {
+            previewModal.style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target == previewModal) {
+                previewModal.style.display = 'none';
+            }
+        });
+        
+        // Save button event handler
+        document.getElementById('saveButton').addEventListener('click', function() {
+            try {
+                // Get the XML from the workspace
+                var xml = Blockly.Xml.workspaceToDom(workspace);
+                var xmlText = Blockly.Xml.domToText(xml);
+                
+                // Generate Arduino code
+                var code = Blockly.Arduino.workspaceToCode(workspace);
+                
+                // Send data back to Android to show save dialog
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.saveWorkspace(xmlText, code);
+                    // Call a method to display the save dialog in Android
+                    if (window.BlocklyBridge.showSaveDialog) {
+                        window.BlocklyBridge.showSaveDialog();
+                    }
+                    window.BlocklyBridge.logMessage("Save dialog requested");
+                } else {
+                    console.error("BlocklyBridge not found!");
+                }
+            } catch (e) {
+                console.error("Error saving workspace:", e);
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.logMessage("Error: " + e.message);
+                }
+            }
+        });
+        
+        // Load blocks from XML if provided
+        function loadBlocksFromXml(xmlText) {
+            try {
+                var xml = Blockly.Xml.textToDom(xmlText);
+                Blockly.Xml.domToWorkspace(xml, workspace);
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.logMessage("Blocks loaded successfully");
+                }
+            } catch (e) {
+                console.error("Error loading blocks:", e);
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.logMessage("Error loading blocks: " + e.message);
+                }
+            }
+        }
+        
+        // Initialize with starting blocks
+        Blockly.Xml.domToWorkspace(
+            Blockly.Xml.textToDom('<xml><block type="arduino_setup" deletable="false" x="20" y="20"></block><block type="arduino_loop" deletable="false" x="20" y="200"></block></xml>'),
+            workspace
+        );
+        
+        // Helper function to generate and save code
+        function generateAndSaveCode() {
+            try {
+                // Get the XML from the workspace
+                var xml = Blockly.Xml.workspaceToDom(workspace);
+                var xmlText = Blockly.Xml.domToText(xml);
+                
+                // Generate Arduino code
+                var code = Blockly.Arduino.workspaceToCode(workspace);
+                
+                // Send data back to Android
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.saveWorkspace(xmlText, code);
+                    window.BlocklyBridge.logMessage("Code generated successfully");
+                } else {
+                    console.error("BlocklyBridge not found!");
+                }
+                
+                return code;
+            } catch (e) {
+                console.error("Error generating code:", e);
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.logMessage("Error: " + e.message);
+                }
+                return null;
+            }
+        }
+        
+        // Auto-save when blocks change (debounced)
+        var saveTimeout = null;
+        function onBlocklyChange(event) {
+            if (saveTimeout) {
+                clearTimeout(saveTimeout);
+            }
+            
+            saveTimeout = setTimeout(function() {
+                generateAndSaveCode();
+            }, 1000); // 1 second debounce
+        }
+        
+        // Listen for changes in the workspace
+        workspace.addChangeListener(onBlocklyChange);
+    </script>
+</body>
+</html> 
