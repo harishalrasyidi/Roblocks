@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -13,13 +17,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
+import androidx.navigation.NavController
 import com.example.roblocks.R
 
 @Composable
 fun ProjectCard(
     title: String,
     existStatus: Boolean,
+    jenisProyek: String,
+    navController: NavController
 ) {
+    var showCreateProject by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -50,7 +59,7 @@ fun ProjectCard(
                 //nanti tambah kondisi buat ngeganti teks jadi project yang udah dibuat kalau dao udah jadi
                 if(existStatus == false){
                     Button(
-                        onClick = { /* TODO: Navigate */ },
+                        onClick = { },
                         modifier = Modifier.width(200.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFFFFF)),
                         shape = RoundedCornerShape(14.dp)
@@ -74,7 +83,7 @@ fun ProjectCard(
                     Spacer(modifier = Modifier.height(2.dp  ))
 
                     Button(
-                        onClick = { /* TODO: Navigate */ },
+                        onClick = { showCreateProject = true },
                         modifier = Modifier.width(200.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                         shape = RoundedCornerShape(14.dp)
@@ -102,12 +111,17 @@ fun ProjectCard(
                                     .offset(x = 3.dp, y = 1.dp)
                             )
                         }
+                        if(showCreateProject == true) {
+                            if(jenisProyek == "AI")
+                                CreateProjectDialogAI(onDismiss = { showCreateProject = false }, navController)
+                            else
+                                CreateProjectDialogRobotics(onDismiss = { showCreateProject = false}, navController)
+                        }
                     }
                 }
                 else{
-
                     Button(
-                        onClick = { /* TODO: Navigate */ },
+                        onClick = { },
                         modifier = Modifier.width(200.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2F88FF)),
                         shape = RoundedCornerShape(14.dp)
@@ -131,7 +145,7 @@ fun ProjectCard(
                     Spacer(modifier = Modifier.height(2.dp  ))
 
                     Button(
-                        onClick = { /* TODO: Navigate */ },
+                        onClick = { showCreateProject = true },
                         modifier = Modifier.width(200.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                         shape = RoundedCornerShape(14.dp)
@@ -158,6 +172,12 @@ fun ProjectCard(
                                     .size(17.dp)
                                     .offset(x = 3.dp, y = 1.dp)
                             )
+                        }
+                        if(showCreateProject == true) {
+                            if(jenisProyek == "AI")
+                                CreateProjectDialogAI(onDismiss = { showCreateProject = false }, navController = navController)
+                            else
+                                CreateProjectDialogRobotics(onDismiss = { showCreateProject = false}, navController = navController)
                         }
                     }
                 }

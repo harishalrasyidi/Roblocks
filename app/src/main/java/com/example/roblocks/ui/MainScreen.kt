@@ -81,7 +81,7 @@ fun MainScreen(navController: NavController) {
                         icon = R.drawable.ic_ai,
                         title = "Artificial Intelligence",
                         backgroundColor = Color(0xFF3366FF),
-                        onClick = { navController.navigate("ml_image") }
+                        onClick = { navController.navigate("artificial_intelligence_screen") }
                     )
                 }
                 item {
