@@ -20,6 +20,7 @@ import com.example.roblocks.ui.LearnScreen
 import com.example.roblocks.ui.MainScreen
 import com.example.roblocks.ui.ProfileScreen
 import com.example.roblocks.ui.RoboticsScreen
+import com.example.roblocks.ui.ai.ImageClassifierApp
 import com.example.roblocks.ui.theme.RoblocksTheme
 
 lateinit var appDatabase: AppDatabase

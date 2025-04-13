@@ -236,3 +236,63 @@ fun ProjectItem(
         }
     }
 }
+
+@Composable
+fun CreateProjectDialogRobotics(onDismiss: () -> Unit, navController: NavController) {
+    val namaProyek = remember { mutableStateOf("") }
+
+    AlertDialog(
+        containerColor = Color(0xFF4A65FE),
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Proyek Robotik/IOT Baru",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = Color.White,
+                    fontSize = 18.sp,
+                ),
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFECD46)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Pilih Jenis Proyek",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color = Color.White,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        cardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "robotik_arduino", navController)
+                        Spacer(modifier = Modifier.height(6.dp))
+                        cardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "robotik_arduino", navController)
+                        Spacer(modifier = Modifier.height(6.dp))
+                        cardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "robotik_arduino", navController)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+        },
+
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = Color.White,
+                        fontSize = 16.sp,
+                    )
+                )
+            }
+        }
+    )
+}

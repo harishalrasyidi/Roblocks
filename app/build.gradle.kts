@@ -73,4 +73,30 @@ dependencies {
     
     // WebView
     implementation("androidx.webkit:webkit:1.8.0")
+
+    // TensorFlow Lite
+
+    implementation (libs.tensorflow.lite)
+    implementation (libs.tensorflow.lite.support)
+    implementation (libs.tensorflow.lite.metadata)
+    implementation (libs.tensorflow.lite.task.vision)
+
+
+    // Coroutines
+    implementation (libs.kotlinx.coroutines.android)
+    implementation (libs.androidx.lifecycle.runtime.ktx.v262)
+    implementation (libs.androidx.lifecycle.viewmodel.compose)
+
+    // File operations
+    implementation (libs.commons.io
+)
+    // Image loading
+    implementation (libs.coil.compose)
+
+    implementation(libs.okhttp)
+
+    implementation (libs.okhttp)
+    implementation (libs.kotlinx.coroutines.android.v173)
+
+    implementation (libs.gson)
 }
