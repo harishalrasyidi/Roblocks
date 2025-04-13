@@ -12,6 +12,17 @@ navigationCompose = "2.8.8" # Tidak disebut tapi digunakan di dependencies Groov
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
 composeBom = "2024.09.00"
+lifecycleRuntimeKtxVersion = "2.6.2"
+kotlinxCoroutinesAndroid = "1.8.1"
+kotlinxCoroutinesAndroidVersion = "1.7.3"
+okhttp = "4.12.0"
+tensorflowLite = "2.16.1"
+tensorflowLiteMetadata = "0.4.4"
+tensorflowLiteSupport = "0.4.4"
+tensorflowLiteTaskVision = "0.4.4"
+coilCompose = "2.7.0"
+commonsIo = "2.16.1"
+gson = "2.10.1"
 
 
 [libraries]
@@ -37,7 +48,19 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 
+androidx-lifecycle-runtime-ktx-v262 = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+commons-io = { module = "commons-io:commons-io", version.ref = "commonsIo" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutines-android-v173 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroidVersion" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLite" }
+tensorflow-lite-metadata = { module = "org.tensorflow:tensorflow-lite-metadata", version.ref = "tensorflowLiteMetadata" }
+tensorflow-lite-support = { module = "org.tensorflow:tensorflow-lite-support", version.ref = "tensorflowLiteSupport" }
+tensorflow-lite-task-vision = { module = "org.tensorflow:tensorflow-lite-task-vision", version.ref = "tensorflowLiteTaskVision" }
 
 
 [plugins]

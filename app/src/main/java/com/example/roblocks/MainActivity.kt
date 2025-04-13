@@ -17,6 +17,7 @@ import com.example.roblocks.ui.LearnScreen
 import com.example.roblocks.ui.MainScreen
 import com.example.roblocks.ui.ProfileScreen
 import com.example.roblocks.ui.RoboticsScreen
+import com.example.roblocks.ui.ai.ImageClassifierApp
 import com.example.roblocks.ui.theme.RoblocksTheme
 
 lateinit var appDatabase: AppDatabase
@@ -39,6 +40,9 @@ class MainActivity : ComponentActivity() {
                     ){
                         composable("main_screen") {
                             MainScreen(navController = navController)
+                        }
+                        composable("ml_image") {
+                            ImageClassifierApp(navController = navController)
                         }
                         composable("artificial_intelligence_screen"){
                             ArtificialIntelligenceScreen(navController = navController)
