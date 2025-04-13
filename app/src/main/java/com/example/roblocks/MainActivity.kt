@@ -58,6 +58,9 @@ class MainActivity : ComponentActivity() {
                     composable("learn_screen") {
                         LearnScreen(navController = navController)
                     }
+                    composable("ml_image"){
+                        ImageClassifierApp(navController = navController)
+                    }
                     composable("blockly_editor_screen") {
                         BlocklyEditorScreen(navController = navController)
                     }
