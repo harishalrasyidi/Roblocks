@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp")
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -88,8 +90,7 @@ dependencies {
     implementation (libs.androidx.lifecycle.viewmodel.compose)
 
     // File operations
-    implementation (libs.commons.io
-)
+    implementation (libs.commons.io)
     // Image loading
     implementation (libs.coil.compose)
 
@@ -99,4 +100,20 @@ dependencies {
     implementation (libs.kotlinx.coroutines.android.v173)
 
     implementation (libs.gson)
+
+    //dagger-hilt
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+
+    //retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+
+}
+
+kapt {
+    correctErrorTypes = true
 }
