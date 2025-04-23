@@ -129,7 +129,6 @@ fun cardJenisProyek(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.Top
             ) {
-                // LEFT: Title + Description + Button
                 Column(
                     modifier = Modifier
                         .weight(1f)

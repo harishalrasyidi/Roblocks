@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.roblocks.data.entities.ProjectIOTEntity
 import com.example.roblocks.domain.repository.ProjectIOTRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -94,6 +95,10 @@ class ProjectIOTViewModel @Inject constructor(
                 generatedCode = inoCode
             )
         }
+    }
+
+    fun getAllProject(): Flow<List<ProjectIOTEntity>> {
+        return(repository.getAllProjects())
     }
     
     // Save project to Room DB and internal storage

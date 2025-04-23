@@ -3,20 +3,27 @@ package com.example.roblocks.data.repository
 import com.example.roblocks.data.DAO.ProjectAIDao
 import com.example.roblocks.data.entities.ProjectAIEntity
 import com.example.roblocks.domain.repository.ProjectAIRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class ProjectAIRepositoryImpl(private val projectAIDao: ProjectAIDao) : ProjectAIRepository {
+@Singleton
 
-    fun getAllProjects(): Flow<List<ProjectAIEntity>> {
+class ProjectAIRepositoryImpl @Inject constructor(
+    @ApplicationContext private val projectAIDao: ProjectAIDao
+) : ProjectAIRepository {
+
+    override fun getAllProjects(): Flow<List<ProjectAIEntity>> {
         return projectAIDao.getAllProjectsNewest()
     }
 
-    suspend fun getProjectById(id: String): ProjectAIEntity? {
+    override suspend fun getProjectById(id: String): ProjectAIEntity? {
         return projectAIDao.getProjectById(id)
     }
 
-    suspend fun saveProject(
+    override suspend fun saveProject(
         name: String,
         description: String,
         blocklyXml: String,
@@ -40,14 +47,14 @@ class ProjectAIRepositoryImpl(private val projectAIDao: ProjectAIDao) : ProjectA
         return project
     }
 
-    suspend fun updateProject(project: ProjectAIEntity) {
+    override suspend fun updateProject(project: ProjectAIEntity) {
         val updatedProject = project.copy(
             updated_at = System.currentTimeMillis()
         )
         projectAIDao.updateProject(updatedProject)
     }
 
-    suspend fun deleteProject(project: ProjectAIEntity) {
+    override suspend fun deleteProject(project: ProjectAIEntity) {
         projectAIDao.deleteProject(project)
     }
 }

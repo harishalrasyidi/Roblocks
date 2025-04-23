@@ -9,15 +9,23 @@ import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.roblocks.R
+import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 import com.example.roblocks.ui.component.ArticleCard
 import com.example.roblocks.ui.BottomNavBar
 import com.example.roblocks.ui.component.ProjectCard
 import com.example.roblocks.ui.component.cardJenisProyek
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun RoboticsScreen(navController: NavController) {
+
+    val ProjectIOTViewModel: ProjectIOTViewModel = hiltViewModel()
+
+    val projectList by ProjectIOTViewModel.getAllProject()
+        .collectAsState(initial = emptyList())
 
     val selectedIndex = remember { mutableStateOf(2) }
 
@@ -50,8 +58,9 @@ fun RoboticsScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
+
             //tambah kondisi jadi ada list project waktu DAO udah beres
-            ProjectCard("Project Robotics/IOT", false, "Robotics", navController)
+            ProjectCard("Project Robotics/IOT", false, "Robotics", navController, projectList)
 
             Spacer(modifier = Modifier.height(24.dp))
 
