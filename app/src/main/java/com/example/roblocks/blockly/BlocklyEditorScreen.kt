@@ -27,13 +27,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,10 +41,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.webkit.WebViewAssetLoader
-import com.example.roblocks.data.ProjectIOTRepository
+import com.example.roblocks.data.repository.ProjectIOTRepositoryImpl
+import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,11 +54,9 @@ fun BlocklyEditorScreen(
     navController: NavController,
     projectId: String? = null // Optional parameter to load existing project
 ) {
+    val viewModel: ProjectIOTViewModel = hiltViewModel()
+
     val context = LocalContext.current
-    val repository = ProjectIOTRepository.getInstance(context)
-    val viewModel: BlocklyViewModel = viewModel(
-        factory = BlocklyViewModelFactory(context, repository)
-    )
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     
@@ -253,7 +251,7 @@ fun CodePreviewDialog(
 
 private fun createWebView(
     context: Context,
-    viewModel: BlocklyViewModel,
+    viewModel: ProjectIOTViewModel,
     onBridgeCreated: (BlocklyBridge) -> Unit
 ): WebView {
     // Configure asset loader
