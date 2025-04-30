@@ -15,7 +15,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "ProyekRobot_table")
 data class ProjectIOTEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey override val id: String,
     override val name: String,
     override val tipe: String,
     val file_block_code: String, // Link ke file XML blockly

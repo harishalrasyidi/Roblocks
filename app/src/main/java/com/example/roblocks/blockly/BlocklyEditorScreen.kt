@@ -115,16 +115,16 @@ fun BlocklyEditorScreen(
             )
             
             // Save Dialog
-            if (uiState.showSaveDialog) {
-                SaveProjectDialog(
-                    projectName = uiState.projectName,
-                    projectDescription = uiState.projectTipe,
-                    onNameChange = viewModel::updateProjectName,
-                    onDescriptionChange = viewModel::updateProjecttipe,
-                    onSave = { viewModel.saveProject() },
-                    onDismiss = viewModel::hideSaveDialog
-                )
-            }
+//            if (uiState.showSaveDialog) {
+//                SaveProjectDialog(
+//                    projectName = uiState.projectName,
+//                    projectDescription = uiState.projectTipe,
+//                    onNameChange = viewModel::updateProjectName,
+//                    onDescriptionChange = viewModel::updateProjectTipe,
+//                    onSave = { viewModel.saveProject() },
+//                    onDismiss = viewModel::hideSaveDialog
+//                )
+//            }
             
             // Code Preview Dialog
             if (uiState.showCodePreview) {
