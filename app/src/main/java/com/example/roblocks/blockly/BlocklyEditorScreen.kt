@@ -118,9 +118,9 @@ fun BlocklyEditorScreen(
             if (uiState.showSaveDialog) {
                 SaveProjectDialog(
                     projectName = uiState.projectName,
-                    projectDescription = uiState.projectDescription,
+                    projectDescription = uiState.projectTipe,
                     onNameChange = viewModel::updateProjectName,
-                    onDescriptionChange = viewModel::updateProjectDescription,
+                    onDescriptionChange = viewModel::updateProjecttipe,
                     onSave = { viewModel.saveProject() },
                     onDismiss = viewModel::hideSaveDialog
                 )

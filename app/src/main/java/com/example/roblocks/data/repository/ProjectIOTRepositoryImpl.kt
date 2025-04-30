@@ -24,7 +24,7 @@ class ProjectIOTRepositoryImpl @Inject constructor(
 
     override suspend fun saveProject(
         name: String,
-        description: String,
+        tipe: String,
         blocklyXml: String,
         arduinoCode: String
     ): ProjectIOTEntity {
@@ -37,7 +37,7 @@ class ProjectIOTRepositoryImpl @Inject constructor(
         val project = ProjectIOTEntity(
             id = uuid,
             name = name,
-            description = description,
+            tipe = tipe,
             file_block_code = blockCodeFileName,
             file_source_code = sourceCodeFileName,
             workspace_xml = blocklyXml,

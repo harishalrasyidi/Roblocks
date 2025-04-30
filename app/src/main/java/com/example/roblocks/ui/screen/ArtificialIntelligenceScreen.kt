@@ -8,15 +8,25 @@ import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.roblocks.R
+import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 import com.example.roblocks.ui.component.ArticleCard
 import com.example.roblocks.ui.BottomNavBar
 import com.example.roblocks.ui.component.ProjectCard
 import com.example.roblocks.ui.component.cardJenisProyek
+import androidx.compose.runtime.collectAsState
+import com.example.roblocks.domain.viewModel.ProjectAIViewModel
+
 
 @Composable
 fun ArtificialIntelligenceScreen(navController: NavController) {
+
+    val projectAIViewModel: ProjectAIViewModel = hiltViewModel()
+
+    val projectList by projectAIViewModel.getAllProject()
+        .collectAsState(initial = emptyList())
 
     val selectedIndex = remember { mutableStateOf(1) }
 
@@ -50,7 +60,7 @@ fun ArtificialIntelligenceScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(20.dp))
 
             //tambah kondisi jadi ada list project waktu DAO udah beres
-            ProjectCard("Project AI", false, "AI", navController = navController)
+            ProjectCard("Project AI", false, "AI", navController = navController, projectList )
 
             Spacer(modifier = Modifier.height(24.dp))
 
