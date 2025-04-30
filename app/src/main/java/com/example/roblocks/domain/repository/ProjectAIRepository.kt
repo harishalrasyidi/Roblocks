@@ -8,7 +8,7 @@ interface ProjectAIRepository {
     suspend fun getProjectById(id: String): ProjectAIEntity?
     suspend fun saveProject(
         name: String,
-        description: String,
+        tipe: String,
         blocklyXml: String,
         arduinoCode: String
     ): ProjectAIEntity

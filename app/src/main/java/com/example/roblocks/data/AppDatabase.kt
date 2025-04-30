@@ -27,7 +27,7 @@ import com.example.roblocks.data.repository.ProjectIOTRepositoryImpl
         ProjectAIEntity::class,
         ProjectIOTEntity::class
     ],
-    version = 2
+    version = 4
 )
 //belum ada DAO
 

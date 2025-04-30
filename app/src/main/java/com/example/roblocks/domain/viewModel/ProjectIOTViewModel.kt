@@ -45,7 +45,7 @@ class ProjectIOTViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(
             showSaveDialog = false,
             projectName = "",
-            projectDescription = ""
+            projectTipe = ""
         )
     }
     
@@ -77,9 +77,9 @@ class ProjectIOTViewModel @Inject constructor(
         )
     }
     
-    fun updateProjectDescription(description: String) {
+    fun updateProjecttipe(tipe: String) {
         _uiState.value = _uiState.value.copy(
-            projectDescription = description
+            projectTipe = tipe
         )
     }
     
@@ -112,7 +112,7 @@ class ProjectIOTViewModel @Inject constructor(
         }
         
         val name = _uiState.value.projectName
-        val description = _uiState.value.projectDescription
+        val tipe = _uiState.value.projectTipe
         
         if (name.isBlank()) {
             _uiState.value = _uiState.value.copy(
@@ -127,7 +127,7 @@ class ProjectIOTViewModel @Inject constructor(
                 // Save to Room DB and get the entity with generated filenames
                 val project = repository.saveProject(
                     name = name,
-                    description = description,
+                    tipe = tipe,
                     blocklyXml = currentWorkspaceXml!!,
                     arduinoCode = currentGeneratedCode!!
                 )
@@ -140,7 +140,7 @@ class ProjectIOTViewModel @Inject constructor(
                     showToast = true,
                     toastMessage = "Proyek tersimpan",
                     projectName = "",
-                    projectDescription = ""
+                    projectTipe = ""
                 )
                 
             } catch (e: Exception) {
@@ -200,7 +200,7 @@ class ProjectIOTViewModel @Inject constructor(
                         _uiState.value = _uiState.value.copy(
                             currentProjectId = projectId,
                             projectName = project.name,
-                            projectDescription = project.description,
+                            projectTipe = project.tipe,
                             generatedCode = currentGeneratedCode ?: ""
                         )
                         
@@ -262,7 +262,7 @@ class ProjectIOTViewModel @Inject constructor(
 data class BlocklyUiState(
     val showSaveDialog: Boolean = false,
     val projectName: String = "",
-    val projectDescription: String = "",
+    val projectTipe: String = "",
     val showToast: Boolean = false,
     val toastMessage: String = "",
     val showCodePreview: Boolean = false,

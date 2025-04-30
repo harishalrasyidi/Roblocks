@@ -43,7 +43,7 @@ class ProjectAIViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(
             showSaveDialog = false,
             projectName = "",
-            projectDescription = ""
+            projectTipe = ""
         )
     }
 
@@ -77,7 +77,7 @@ class ProjectAIViewModel @Inject constructor(
 
     fun updateProjectDescription(description: String) {
         _uiState.value = _uiState.value.copy(
-            projectDescription = description
+            projectTipe = description
         )
     }
 

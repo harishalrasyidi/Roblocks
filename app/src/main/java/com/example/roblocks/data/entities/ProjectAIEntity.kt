@@ -17,7 +17,7 @@ import androidx.room.PrimaryKey
 data class ProjectAIEntity(
     @PrimaryKey val id: String,
     override val name: String,
-    val description: String,
+    override val tipe: String,
     val file_source_proyek_AI: String,
     val created_at: Long,
     val updated_at: Long,

@@ -1,6 +1,7 @@
 package com.example.roblocks.ui.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +29,7 @@ import com.example.roblocks.ui.screen.CreateProjectDialogAI
 import com.example.roblocks.ui.screen.CreateProjectDialogRobotics
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEmpty
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @Composable
 fun<T: ProjectEntity> ProjectCard(
@@ -48,7 +51,7 @@ fun<T: ProjectEntity> ProjectCard(
         )
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().width(IntrinsicSize.Min)
         ) {
             Column(
                 modifier = Modifier
@@ -134,6 +137,8 @@ fun<T: ProjectEntity> ProjectCard(
                                             .offset(x = 3.dp, y = 1.dp)
                                     )
                                 }
+
+
                                 if (showCreateProject == true) {
                                     if (jenisProyek == "AI")
                                         CreateProjectDialogAI(onDismiss = {
@@ -156,30 +161,91 @@ fun<T: ProjectEntity> ProjectCard(
                             projectList.forEach {
                                 Button(
                                     onClick = { },
-                                    modifier = Modifier.width(200.dp),
+                                    modifier = Modifier.width(250.dp),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color(
-                                            0xFF231FFF
+                                            0xFF2F88FF
                                         )
                                     ),
-                                    shape = RoundedCornerShape(14.dp)
+                                    shape = RoundedCornerShape(14.dp),
                                 ) {
+                                    //konten untuk tombol
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.Start
+                                        horizontalArrangement = Arrangement.Start,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text(
-                                            it.name.toString(),
-                                            style = MaterialTheme.typography.bodySmall.copy(
-                                                color = Color.Black,
-                                                fontSize = 14.sp,
-                                                lineHeight = 22.sp,
-                                                textAlign = TextAlign.Justify,
-                                            ),
-                                            fontWeight = FontWeight.Bold
+                                        Column {
+                                            Row(
+                                                modifier = Modifier.weight(1f),
+                                                horizontalArrangement = Arrangement.Start
+                                            ) {
+                                                Text(
+                                                    "Nama Proyek: ",
+                                                    style = MaterialTheme.typography.bodySmall.copy(
+                                                        color = Color.White,
+                                                        fontSize = 14.sp,
+                                                        lineHeight = 22.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        textAlign = TextAlign.Justify,
+                                                    ),
+                                                    fontWeight = FontWeight.Bold
+                                                )
+
+
+                                                Text(
+                                                    it.name.toString(),
+                                                    style = MaterialTheme.typography.bodySmall.copy(
+                                                        color = Color.White,
+                                                        fontSize = 14.sp,
+                                                        lineHeight = 22.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        textAlign = TextAlign.Justify,
+                                                    ),
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.Start
+                                            ) {
+                                                Text(
+                                                    "Tipe: ",
+                                                    style = MaterialTheme.typography.bodySmall.copy(
+                                                        color = Color.White,
+                                                        fontSize = 14.sp,
+                                                        lineHeight = 22.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        textAlign = TextAlign.Justify,
+                                                    ),
+                                                    fontWeight = FontWeight.Bold
+                                                )
+
+
+                                                Text(
+                                                    it.tipe,
+                                                    style = MaterialTheme.typography.bodySmall.copy(
+                                                        color = Color.White,
+                                                        fontSize = 14.sp,
+                                                        lineHeight = 22.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        textAlign = TextAlign.Justify,
+                                                    ),
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.width(2.dp))
+
+                                        Image(
+                                            painter = painterResource(id = R.drawable.open_proyek_illustration),
+                                            contentDescription = "Buka Proyek",
+                                            modifier = Modifier
+                                                .size(17.dp)
                                         )
                                     }
-
                                 }
                             }
 
@@ -218,6 +284,8 @@ fun<T: ProjectEntity> ProjectCard(
                                             .offset(x = 3.dp, y = 1.dp)
                                     )
                                 }
+
+
                                 if (showCreateProject == true) {
                                     if (jenisProyek == "AI")
                                         CreateProjectDialogAI(onDismiss = {
@@ -229,6 +297,43 @@ fun<T: ProjectEntity> ProjectCard(
                                         }, navController)
                                 }
                             }
+
+                            Button(
+                                onClick = { showCreateProject = true },
+                                modifier = Modifier.width(200.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF4C543)),
+                                shape = RoundedCornerShape(14.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Start
+                                ) {
+                                    Text(
+                                        "Edit Projek",
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = Color.White,
+                                            fontSize = 14.sp,
+                                            lineHeight = 22.sp,
+                                            textAlign = TextAlign.Justify,
+                                        ),
+                                        fontWeight = FontWeight.Bold
+                                    )
+
+                                    Image(
+                                        painter = painterResource(id = R.drawable.edit_proyek_illustration),
+                                        contentDescription = "Edit Project Illustration",
+                                        modifier = Modifier
+                                            .size(17.dp)
+                                            .offset(x = 3.dp, y = 1.dp)
+                                    )
+                                }
+        //                        if(showCreateProject == true) {
+        //                            if(jenisProyek == "AI")
+        //                                CreateProjectDialogAI(onDismiss = { showCreateProject = false }, navController = navController)
+        //                            else
+        //                                CreateProjectDialogRobotics(onDismiss = { showCreateProject = false}, navController = navController)
+        //                        }
+                                    }
                         }
                     }
                 }
@@ -292,6 +397,43 @@ fun<T: ProjectEntity> ProjectCard(
                             else
                                 CreateProjectDialogRobotics(onDismiss = { showCreateProject = false}, navController = navController)
                         }
+                    }
+
+                    Button(
+                        onClick = { showCreateProject = true },
+                        modifier = Modifier.width(200.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF4C543)),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Start
+                        ) {
+                            Text(
+                                "Buat Projek Baru",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color.White,
+                                    fontSize = 14.sp,
+                                    lineHeight = 22.sp,
+                                    textAlign = TextAlign.Justify,
+                                ),
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Image(
+                                painter = painterResource(id = R.drawable.edit_proyek_illustration),
+                                contentDescription = "Tambah Project Illustration",
+                                modifier = Modifier
+                                    .size(17.dp)
+                                    .offset(x = 3.dp, y = 1.dp)
+                            )
+                        }
+//                        if(showCreateProject == true) {
+//                            if(jenisProyek == "AI")
+//                                CreateProjectDialogAI(onDismiss = { showCreateProject = false }, navController = navController)
+//                            else
+//                                CreateProjectDialogRobotics(onDismiss = { showCreateProject = false}, navController = navController)
+//                        }
                     }
                 }
                 }
