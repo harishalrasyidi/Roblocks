@@ -15,7 +15,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "ProyekAI_table")
 data class ProjectAIEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey override val id: String,
     override val name: String,
     override val tipe: String,
     val file_source_proyek_AI: String,

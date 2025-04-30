@@ -77,7 +77,7 @@ class ProjectIOTViewModel @Inject constructor(
         )
     }
     
-    fun updateProjecttipe(tipe: String) {
+    fun updateProjectTipe(tipe: String) {
         _uiState.value = _uiState.value.copy(
             projectTipe = tipe
         )
@@ -102,7 +102,7 @@ class ProjectIOTViewModel @Inject constructor(
     }
     
     // Save project to Room DB and internal storage
-    fun saveProject() {
+    fun saveProject(projectName: String, projectTipe: String) {
         if (currentWorkspaceXml == null || currentGeneratedCode == null) {
             _uiState.value = _uiState.value.copy(
                 showToast = true,
@@ -110,11 +110,8 @@ class ProjectIOTViewModel @Inject constructor(
             )
             return
         }
-        
-        val name = _uiState.value.projectName
-        val tipe = _uiState.value.projectTipe
-        
-        if (name.isBlank()) {
+
+        if (projectName.isBlank()) {
             _uiState.value = _uiState.value.copy(
                 showToast = true,
                 toastMessage = "Nama proyek tidak boleh kosong"
@@ -126,8 +123,8 @@ class ProjectIOTViewModel @Inject constructor(
             try {
                 // Save to Room DB and get the entity with generated filenames
                 val project = repository.saveProject(
-                    name = name,
-                    tipe = tipe,
+                    name = projectName,
+                    tipe = projectTipe,
                     blocklyXml = currentWorkspaceXml!!,
                     arduinoCode = currentGeneratedCode!!
                 )
@@ -135,13 +132,13 @@ class ProjectIOTViewModel @Inject constructor(
                 // Save Arduino code to internal storage (.ino file)
                 saveArduinoCodeToFile(project, currentGeneratedCode!!)
                 
-                _uiState.value = _uiState.value.copy(
-                    showSaveDialog = false,
-                    showToast = true,
-                    toastMessage = "Proyek tersimpan",
-                    projectName = "",
-                    projectTipe = ""
-                )
+//                _uiState.value = _uiState.value.copy(
+//                    showSaveDialog = false,
+//                    showToast = true,
+//                    toastMessage = "Proyek tersimpan",
+//                    projectName = "",
+//                    projectTipe = ""
+//                )
                 
             } catch (e: Exception) {
                 Log.e(TAG, "Error saving project", e)

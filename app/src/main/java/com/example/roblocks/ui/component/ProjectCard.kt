@@ -1,5 +1,6 @@
 package com.example.roblocks.ui.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -21,10 +22,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.roblocks.R
 import com.example.roblocks.data.entities.ProjectEntity
 import com.example.roblocks.data.entities.ProjectIOTEntity
+import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 import com.example.roblocks.ui.screen.CreateProjectDialogAI
 import com.example.roblocks.ui.screen.CreateProjectDialogRobotics
 import kotlinx.coroutines.flow.Flow
@@ -41,6 +44,7 @@ fun<T: ProjectEntity> ProjectCard(
 ) {
     var showCreateProject by remember { mutableStateOf(false) }
 
+    val ProjectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -160,14 +164,15 @@ fun<T: ProjectEntity> ProjectCard(
                         ) {
                             projectList.forEach {
                                 Button(
-                                    onClick = { },
-                                    modifier = Modifier.width(250.dp),
+                                    onClick = { print("Being Clicked") },
+                                    modifier = Modifier.width(250.dp).height(IntrinsicSize.Min),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color(
                                             0xFF2F88FF
                                         )
                                     ),
                                     shape = RoundedCornerShape(14.dp),
+                                    border = BorderStroke(1.dp, Color.White)
                                 ) {
                                     //konten untuk tombol
                                     Row(

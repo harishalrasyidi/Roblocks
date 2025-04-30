@@ -11,7 +11,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.roblocks.blockly.SaveProjectDialog
+import com.example.roblocks.data.entities.ProjectIOTEntity
+import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 
 @Composable
 fun insertNamaProyek(
@@ -21,7 +25,7 @@ fun insertNamaProyek(
     navController: NavController
 ){
     val namaProyek = remember { mutableStateOf("") }
-
+    val projectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
     AlertDialog(
         containerColor = Color(0xFFA199FF),
         onDismissRequest = onDismiss,
@@ -77,6 +81,7 @@ fun insertNamaProyek(
             TextButton(onClick = {
                 onDismiss()
                 navController.navigate(route)
+                projectIOTViewModel.saveProject(namaProyek.toString(), title)
             }) {
                 Text(
                     "Buat Proyek",
