@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.roblocks.data.DAO.ModuleDao
 import com.example.roblocks.data.DAO.ProjectAIDao
 import com.example.roblocks.data.DAO.ProjectIOTDao
+import com.example.roblocks.data.DAO.QuestionDao
 import com.example.roblocks.data.entities.AdminEntity
 import com.example.roblocks.data.entities.LecturerEntity
 import com.example.roblocks.data.entities.ModuleEntity
@@ -35,8 +37,8 @@ abstract class AppDatabase : RoomDatabase() {
 //    abstract fun adminDao(): AdminDao
 //    abstract fun lecturerDao(): LecturerDao
 //    abstract fun siswaDao(): SiswaDao
-//    abstract fun moduleDao(): ModuleDao
-//    abstract fun questionDao(): QuestionDao
+    abstract fun moduleDao(): ModuleDao
+    abstract fun questionDao(): QuestionDao
 //    abstract fun userProgressDao(): UserProgressDao
     abstract fun projectAIDao(): ProjectAIDao
     abstract fun projectIOTDao(): ProjectIOTDao

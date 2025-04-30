@@ -1,8 +1,11 @@
 package com.example.roblocks.data.entities
 
+import androidx.compose.ui.semantics.Role
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import java.sql.Time
+import java.util.UUID
 
 @Entity(tableName = "Question_table",
     foreignKeys = [ForeignKey(
@@ -24,3 +27,4 @@ data class QuestionEntity(
     val created_at: Long,
     val updated_at: Long
 )
+

@@ -17,6 +17,9 @@ import com.example.roblocks.ui.screen.MainScreen
 import com.example.roblocks.ui.screen.ProfileScreen
 import com.example.roblocks.ui.screen.RoboticsScreen
 import com.example.roblocks.ai.ImageClassifierApp
+import com.example.roblocks.ui.screen.ModuleDetailScreen
+import com.example.roblocks.ui.screen.ModuleListScreen
+import com.example.roblocks.ui.screen.QuizScreen
 import com.example.roblocks.ui.theme.RoblocksTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
@@ -64,6 +67,25 @@ class MainActivity : ComponentActivity() {
                     composable("blockly_editor_screen") {
                         BlocklyEditorScreen(navController = navController)
                     }
+                    composable("quiz_screen/{moduleId}") { backStackEntry ->
+                        val moduleId = backStackEntry.arguments?.getString("moduleId") ?: ""
+                        QuizScreen(navController = navController, moduleId = moduleId)
+                    }
+
+                    composable("learn_screen") {
+                        ModuleListScreen(
+                            navController = navController,
+                            onModuleClick = { module ->
+                                navController.navigate("module_detail_screen/${module.id}")
+                            }
+                        )
+                    }
+
+                    composable("module_detail_screen/{moduleId}") { backStackEntry ->
+                        val moduleId = backStackEntry.arguments?.getString("moduleId") ?: ""
+                        ModuleDetailScreen(navController = navController, moduleId = moduleId)
+                    }
+
                     composable(
                         route = "blockly_editor_screen?projectId={projectId}",
                         arguments = listOf(
