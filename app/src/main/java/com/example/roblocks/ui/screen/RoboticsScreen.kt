@@ -67,7 +67,10 @@ fun RoboticsScreen(navController: NavController) {
             ArticleCard(
                 icon = R.drawable.ic_buku,
                 title = "Learn",
-                description = "Pelajari Tentang Robotika dan Internet Of Things"
+                description = "Pelajari Tentang Robotika dan Internet Of Things",
+                onClick = {
+                    navController.navigate("learn_screen")
+                }
             )
         }
     }

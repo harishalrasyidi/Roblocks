@@ -58,8 +58,7 @@ fun ArtificialIntelligenceScreen(navController: NavController) {
             Text("Artificial Intelligence", fontWeight = FontWeight.Bold, fontSize = 20.sp)
 
             Spacer(modifier = Modifier.height(20.dp))
-
-            //tambah kondisi jadi ada list project waktu DAO udah beres
+//tambah kondisi jadi ada list project waktu DAO udah beres
             ProjectCard("Project AI", false, "AI", navController = navController, projectList )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -67,7 +66,10 @@ fun ArtificialIntelligenceScreen(navController: NavController) {
             ArticleCard(
                 icon = R.drawable.ic_buku,
                 title = "Learn",
-                description = "Apasih Machine Learning/Artificial Intelligence Itu?"
+                description = "Apasih Machine Learning/Artificial Intelligence Itu?",
+                onClick = {
+                    navController.navigate("learn_screen")
+                }
             )
         }
     }
