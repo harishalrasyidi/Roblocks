@@ -90,7 +90,7 @@ fun MainScreen(navController: NavController) {
                         icon = R.drawable.ic_buku,
                         title = "Learn",
                         backgroundColor = Color(0xFFFF4D4D),
-                        onClick = { /* Handle Learn click */ }
+                        onClick = { navController.navigate("learn_screen") }
                     )
                 }
                 item {
