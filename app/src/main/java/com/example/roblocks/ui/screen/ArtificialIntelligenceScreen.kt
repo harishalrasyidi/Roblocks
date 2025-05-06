@@ -15,7 +15,7 @@ import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 import com.example.roblocks.ui.component.ArticleCard
 import com.example.roblocks.ui.BottomNavBar
 import com.example.roblocks.ui.component.ProjectCard
-import com.example.roblocks.ui.component.cardJenisProyek
+import com.example.roblocks.ui.component.CardJenisProyek
 import androidx.compose.runtime.collectAsState
 import com.example.roblocks.domain.viewModel.ProjectAIViewModel
 
@@ -109,7 +109,7 @@ fun CreateProjectDialogAI(onDismiss: () -> Unit, navController: NavController) {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
 
-                        cardJenisProyek("Klasifikasi Gambar", R.drawable.ic_ai, "Buatlah suatu model yang bisa tahu maksud dari  gambar yang kamu kirim!", "ml_image", navController = navController)
+                        CardJenisProyek("Klasifikasi Gambar", R.drawable.ic_ai, "Buatlah suatu model yang bisa tahu maksud dari  gambar yang kamu kirim!", "ml_image", navController = navController, "AI")
                     }
                 }
             }

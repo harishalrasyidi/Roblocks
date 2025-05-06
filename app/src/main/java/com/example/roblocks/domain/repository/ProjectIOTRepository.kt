@@ -12,5 +12,7 @@ interface ProjectIOTRepository {
         blocklyXml: String,
         arduinoCode: String
     ): ProjectIOTEntity
+    suspend fun insertProject(project: ProjectIOTEntity)
     suspend fun updateProject(project: ProjectIOTEntity)
-    suspend fun deleteProject(project: ProjectIOTEntity)}
+    suspend fun deleteProject(project: ProjectIOTEntity)
+}
