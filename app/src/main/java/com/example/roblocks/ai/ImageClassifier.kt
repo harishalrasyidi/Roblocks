@@ -10,37 +10,41 @@ import kotlin.math.sqrt
 class ImageClassifier(private val context: Context) {
 
     private var modelFile: File? = null
-    private var class1MeanColor: Int? = null
-    private var class2MeanColor: Int? = null
+    private var meanColors: List<Int> = emptyList()
+    private var classLabels: List<String> = emptyList()
 
     fun loadModel(file: File) {
         modelFile = file
         // Optional: logika tambahan untuk validasi file bisa dimasukkan di sini
     }
 
-    fun setTrainingData(class1: List<Bitmap>, class2: List<Bitmap>) {
-        class1MeanColor = calculateAverageColor(class1)
-        class2MeanColor = calculateAverageColor(class2)
+    fun setTrainingData(imageLists: List<List<Bitmap>>, labels: List<String>) {
+        if (imageLists.size != labels.size) {
+            throw IllegalArgumentException("Number of image lists (${imageLists.size}) must match number of labels (${labels.size})")
+        }
+        meanColors = imageLists.map { images ->
+            if (images.isEmpty()) {
+                throw IllegalArgumentException("Image list for a class cannot be empty")
+            }
+            calculateAverageColor(images)
+        }
+        classLabels = labels
     }
 
     fun classify(bitmap: Bitmap): Pair<String, Float> {
-        val imageColor = calculateAverageColor(bitmap)
-
-        val distToClass1 = colorDistance(imageColor, class1MeanColor!!)
-        val distToClass2 = colorDistance(imageColor, class2MeanColor!!)
-
-        val confidence: Float
-        val prediction: String
-
-        if (distToClass1 < distToClass2) {
-            prediction = "Class 1"
-            confidence = (1f - (distToClass1 / (distToClass1 + distToClass2)))
-        } else {
-            prediction = "Class 2"
-            confidence = (1f - (distToClass2 / (distToClass1 + distToClass2)))
+        if (meanColors.isEmpty() || classLabels.isEmpty()) {
+            throw IllegalStateException("Training data not set. Call setTrainingData first.")
         }
 
-        return prediction to confidence
+        val imageColor = calculateAverageColor(bitmap)
+        val distances = meanColors.map { colorDistance(imageColor, it) }
+        val minDistance = distances.minOrNull() ?: return "Unknown" to 0f
+        val minIndex = distances.indexOf(minDistance)
+
+        val totalDistance = distances.sum()
+        val confidence = if (totalDistance == 0f) 1f else (1f - (minDistance / totalDistance))
+
+        return classLabels[minIndex] to confidence
     }
 
     private fun calculateAverageColor(images: List<Bitmap>): Int {
