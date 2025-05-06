@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.roblocks.ai.ImageClass
 import com.example.roblocks.ai.ImageClassifier
 import com.example.roblocks.ai.ImageUploader
 import com.example.roblocks.ai.ModelTrainer
@@ -11,6 +12,7 @@ import com.example.roblocks.ai.PermissionUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,6 +28,32 @@ class ClassifierViewModel : ViewModel() {
     val uiState: StateFlow<ClassifierUiState> = _uiState
 
     private var classifier: ImageClassifier? = null
+
+    private val _imageClasses = MutableStateFlow(listOf(ImageClass("Class 1"), ImageClass("Class 2")))
+    val imageClasses: StateFlow<List<ImageClass>> = _imageClasses.asStateFlow()
+
+    fun addNewClass() {
+        val newClassName = "Class ${_imageClasses.value.size + 1}"
+        _imageClasses.value = _imageClasses.value + ImageClass(newClassName)
+    }
+
+    fun addImageToClass(classIndex: Int, bitmap: Bitmap) {
+        val currentList = _imageClasses.value.toMutableList()
+        if (classIndex < currentList.size) {
+            currentList[classIndex] = currentList[classIndex].copy(
+                imageCount = currentList[classIndex].imageCount + 1,
+                images = currentList[classIndex].images + bitmap
+            )
+            _imageClasses.value = currentList.toList()
+
+            val className = currentList[classIndex].name
+            if (className == "Class 1") {
+                _uiState.update { it.copy(class1Images = it.class1Images + bitmap) }
+            } else if (className == "Class 2") {
+                _uiState.update { it.copy(class2Images = it.class2Images + bitmap) }
+            }
+        }
+    }
 
     fun addClass1Image(bitmap: Bitmap) {
         _uiState.value = _uiState.value.copy(
@@ -56,11 +84,13 @@ class ClassifierViewModel : ViewModel() {
             _uiState.update { it.copy(isTraining = true, trainingError = null, trainingMessage = "Uploading images...") }
 
             val uploader = ImageUploader()
-            val uploadSuccess = uploader.uploadImages(
-                context,
-                _uiState.value.class1Images,
-                _uiState.value.class2Images
-            )
+            // Collect all images from all classes
+            val allImages = _imageClasses.value.flatMap { it.images }
+            val classLabels = _imageClasses.value.map { it.name }
+            val imagesPerClass = _imageClasses.value.map { it.images.size }
+
+
+            val uploadSuccess = uploader.uploadImages(context, allImages, classLabels, imagesPerClass)
 
             if (uploadSuccess) {
                 _uiState.update { it.copy(trainingMessage = "Training on server...") }
@@ -89,18 +119,15 @@ class ClassifierViewModel : ViewModel() {
                             classifier = ImageClassifier(context)
                         }
                         classifier?.loadModel(file)
-                        classifier?.setTrainingData(
-                            _uiState.value.class1Images,
-                            _uiState.value.class2Images
-                        )
+                        // Train with all classes' images
+                        classifier?.setTrainingData(_imageClasses.value.map { it.images }, classLabels)
                         _uiState.update {
                             it.copy(
                                 isTraining = false,
                                 modelTrained = true
                             )
                         }
-                    }
-                    else {
+                    } else {
                         _uiState.update {
                             it.copy(
                                 isTraining = false,
@@ -108,7 +135,6 @@ class ClassifierViewModel : ViewModel() {
                             )
                         }
                     }
-
                 } catch (e: Exception) {
                     _uiState.update {
                         it.copy(
@@ -117,7 +143,6 @@ class ClassifierViewModel : ViewModel() {
                         )
                     }
                 }
-
             } else {
                 _uiState.update {
                     it.copy(
@@ -128,6 +153,8 @@ class ClassifierViewModel : ViewModel() {
             }
         }
     }
+
+
 
 
     fun classifyImage(bitmap: Bitmap, context: Context) {
@@ -188,15 +215,17 @@ class ClassifierViewModel : ViewModel() {
     data class ClassifierUiState(
         val class1Images: List<Bitmap> = emptyList(),
         val class2Images: List<Bitmap> = emptyList(),
-        val selectedClass: Int = 0,
+        val isTraining: Boolean = false,
+        val modelTrained: Boolean = false,
+        val trainingMessage: String? = null,
+        val trainingError: String? = null,
         val predictionResult: String? = null,
         val confidence: Float = 0f,
-        val isTraining: Boolean = false,
-        val trainingMessage: String? = null,
-        val trainingMessageColor: Int = android.graphics.Color.RED,
-        val trainingError: String? = null,
-        val modelTrained: Boolean = false,
         val showPermissionDialog: Boolean = false,
-        val shouldRequestStoragePermission: Boolean = false
+        val shouldRequestStoragePermission: Boolean = false,
+        val selectedClass: Int = 1,
+        val epochs: Int = 10,
+        val batchSize: Int = 32,
+        val learningRate: Float = 0.001f
     )
 }
