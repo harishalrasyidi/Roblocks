@@ -297,6 +297,6 @@ private fun createWebView(
         onBridgeCreated(bridge)
         
         // Load the Blockly HTML page from assets
-        loadUrl("file:///android_asset/blockly_editor.html")
+        loadUrl("file:///android_asset/custom_blocklyduino.html")
     }
 } 

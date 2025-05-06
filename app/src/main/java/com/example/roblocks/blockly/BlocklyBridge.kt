@@ -21,6 +21,56 @@ class BlocklyBridge(
         onWorkspaceSaved(xml, inoCode)
     }
     
+    /**
+     * For compatibility with BlocklyDuino's save button
+     * This function will be called from JavaScript when user clicks Save XML button
+     */
+    @JavascriptInterface
+    fun saveXml(xmlText: String) {
+        Log.d(TAG, "Saving XML from BlocklyDuino")
+        // Get the Arduino code too
+        webView.post {
+            webView.evaluateJavascript(
+                "javascript:(function() { return Blockly.Arduino.workspaceToCode(); })()",
+            ) { arduinoCode ->
+                // Remove quotes that surround the returned JavaScript string
+                val cleanArduinoCode = arduinoCode.trim('"').replace("\\\"", "\"").replace("\\n", "\n")
+                onWorkspaceSaved(xmlText, cleanArduinoCode)
+            }
+        }
+    }
+    
+    /**
+     * For compatibility with BlocklyDuino's upload button
+     * This function will be called from JavaScript when user clicks Upload button
+     */
+    @JavascriptInterface
+    fun uploadCode() {
+        Log.d(TAG, "Upload code requested from BlocklyDuino")
+        webView.post {
+            webView.evaluateJavascript(
+                "javascript:(function() { return { xml: Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace)), code: Blockly.Arduino.workspaceToCode() }; })()",
+            ) { result ->
+                try {
+                    // Parse the result which comes as a JavaScript object string
+                    // Basic parsing: the result is in the format: {"xml":"...","code":"..."}
+                    val xml = result.substringAfter("\"xml\":\"").substringBefore("\",\"code\"")
+                    val code = result.substringAfter("\"code\":\"").substringBefore("\"}")
+                    
+                    // Clean up escaped characters
+                    val cleanXml = xml.replace("\\\"", "\"").replace("\\n", "\n")
+                    val cleanCode = code.replace("\\\"", "\"").replace("\\n", "\n")
+                    
+                    onWorkspaceSaved(cleanXml, cleanCode)
+                    // Show code preview dialog automatically
+                    onShowSaveDialog()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error parsing upload result", e)
+                }
+            }
+        }
+    }
+    
     @JavascriptInterface
     fun showSaveDialog() {
         Log.d(TAG, "Showing save dialog")
@@ -43,7 +93,19 @@ class BlocklyBridge(
      */
     fun loadWorkspaceFromXml(xml: String) {
         val escapedXml = xml.replace("'", "\\'").replace("\n", "\\n")
-        val jsCode = "javascript:loadBlocksFromXml('$escapedXml');"
+        // Modified to use BlocklyDuino's way of loading XML
+        val jsCode = """
+            javascript:(function() {
+                try {
+                    var xmlDom = Blockly.Xml.textToDom('$escapedXml');
+                    Blockly.mainWorkspace.clear();
+                    Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xmlDom);
+                    console.log('Workspace loaded successfully');
+                } catch(e) {
+                    console.error('Error loading workspace:', e);
+                }
+            })();
+        """.trimIndent()
         
         Log.d(TAG, "Loading workspace from XML")
         webView.post {
