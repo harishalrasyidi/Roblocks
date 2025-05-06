@@ -18,7 +18,16 @@ class BlocklyBridge(
     @JavascriptInterface
     fun saveWorkspace(xml: String, inoCode: String) {
         Log.d(TAG, "Saving workspace")
-        onWorkspaceSaved(xml, inoCode)
+        // Validasi XML untuk memastikan namespace yang benar
+        if (xml.isNotEmpty()) {
+            // Log XML untuk debugging
+            Log.d(TAG, "XML received: ${if(xml.length > 100) xml.substring(0, 100) + "..." else xml}")
+            
+            // Kirim data ke ViewModel
+            onWorkspaceSaved(xml, inoCode)
+        } else {
+            Log.e(TAG, "Empty XML received, cannot save workspace")
+        }
     }
     
     /**
@@ -28,15 +37,23 @@ class BlocklyBridge(
     @JavascriptInterface
     fun saveXml(xmlText: String) {
         Log.d(TAG, "Saving XML from BlocklyDuino")
-        // Get the Arduino code too
-        webView.post {
-            webView.evaluateJavascript(
-                "javascript:(function() { return Blockly.Arduino.workspaceToCode(); })()",
-            ) { arduinoCode ->
-                // Remove quotes that surround the returned JavaScript string
-                val cleanArduinoCode = arduinoCode.trim('"').replace("\\\"", "\"").replace("\\n", "\n")
-                onWorkspaceSaved(xmlText, cleanArduinoCode)
+        // Validasi XML untuk memastikan namespace yang benar
+        if (xmlText.isNotEmpty()) {
+            // Log XML untuk debugging
+            Log.d(TAG, "XML received: ${if(xmlText.length > 100) xmlText.substring(0, 100) + "..." else xmlText}")
+            
+            // Get the Arduino code too
+            webView.post {
+                webView.evaluateJavascript(
+                    "javascript:(function() { return Blockly.Arduino.workspaceToCode(); })()",
+                ) { arduinoCode ->
+                    // Remove quotes that surround the returned JavaScript string
+                    val cleanArduinoCode = arduinoCode.trim('"').replace("\\\"", "\"").replace("\\n", "\n")
+                    onWorkspaceSaved(xmlText, cleanArduinoCode)
+                }
             }
+        } else {
+            Log.e(TAG, "Empty XML received, cannot save XML")
         }
     }
     
@@ -111,6 +128,35 @@ class BlocklyBridge(
         webView.post {
             webView.evaluateJavascript(jsCode) { result ->
                 Log.d(TAG, "Workspace load result: $result")
+            }
+        }
+    }
+    
+    /**
+     * Trigger save workspace from Kotlin code
+     */
+    fun saveWorkspace() {
+        Log.d(TAG, "Triggering workspace save from Kotlin")
+        webView.post {
+            webView.evaluateJavascript(
+                """
+                javascript:(function() {
+                    try {
+                        // Get XML
+                        var xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace));
+                        // Get Arduino code
+                        var code = Blockly.Arduino.workspaceToCode();
+                        // Save via Bridge
+                        BlocklyBridge.saveWorkspace(xml, code);
+                        return "success";
+                    } catch(e) {
+                        console.error('Error saving workspace:', e);
+                        return "error: " + e.message;
+                    }
+                })();
+                """.trimIndent(),
+            ) { result ->
+                Log.d(TAG, "Workspace save result: $result")
             }
         }
     }

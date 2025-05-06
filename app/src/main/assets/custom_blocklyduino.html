@@ -546,7 +546,7 @@
         // Save button - for project saving
         document.getElementById('saveButton').addEventListener('click', function() {
             try {
-                // Get the workspace XML
+                // Get the workspace XML dengan namespace yang benar
                 var xml = Blockly.Xml.workspaceToDom(workspace);
                 var xmlText = Blockly.Xml.domToText(xml);
                 
@@ -555,6 +555,9 @@
                 
                 // Generate Arduino code
                 var code = Blockly.Arduino.workspaceToCode(workspace);
+                
+                // Log XML untuk debugging
+                console.log("Saving XML:", xmlText);
                 
                 // Send to Android
                 if (window.BlocklyBridge) {
@@ -578,30 +581,40 @@
         // Auto-save when blocks change (debounced)
         var saveTimeout = null;
         function onBlocklyChange(event) {
-            if (saveTimeout) {
-                clearTimeout(saveTimeout);
-            }
-            
-            saveTimeout = setTimeout(function() {
-                try {
-                    // Get the XML from the workspace
-                    var xml = Blockly.Xml.workspaceToDom(workspace);
-                    var xmlText = Blockly.Xml.domToText(xml);
-                    
-                    // Save locally
-                    localStorage.setItem('blocklyXML', xmlText);
-                    
-                    // Generate Arduino code
-                    var code = Blockly.Arduino.workspaceToCode(workspace);
-                    
-                    // Send to Android if bridge is available
-                    if (window.BlocklyBridge) {
-                        window.BlocklyBridge.saveWorkspace(xmlText, code);
-                    }
-                } catch (e) {
-                    console.error("Error in auto-save:", e);
+            // Hanya auto-save saat blok berubah, bukan saat aplikasi dimulai
+            if (!event.isUiEvent && (event.type == Blockly.Events.BLOCK_CHANGE || 
+                event.type == Blockly.Events.BLOCK_CREATE || 
+                event.type == Blockly.Events.BLOCK_DELETE || 
+                event.type == Blockly.Events.BLOCK_MOVE)) {
+                
+                if (saveTimeout) {
+                    clearTimeout(saveTimeout);
                 }
-            }, 1000); // 1 second debounce
+                
+                saveTimeout = setTimeout(function() {
+                    try {
+                        // Get the XML from the workspace
+                        var xml = Blockly.Xml.workspaceToDom(workspace);
+                        var xmlText = Blockly.Xml.domToText(xml);
+                        
+                        // Log XML untuk debugging
+                        console.log("Auto-saving XML:", xmlText.substring(0, 100) + "...");
+                        
+                        // Save locally
+                        localStorage.setItem('blocklyXML', xmlText);
+                        
+                        // Generate Arduino code
+                        var code = Blockly.Arduino.workspaceToCode(workspace);
+                        
+                        // Send to Android if bridge is available
+                        if (window.BlocklyBridge) {
+                            window.BlocklyBridge.saveWorkspace(xmlText, code);
+                        }
+                    } catch (e) {
+                        console.error("Error in auto-save:", e);
+                    }
+                }, 1000); // 1 second debounce
+            }
         }
         
         // Function to load workspace from external source

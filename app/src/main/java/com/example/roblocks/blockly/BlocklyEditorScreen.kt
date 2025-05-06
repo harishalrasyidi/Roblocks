@@ -18,6 +18,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
@@ -114,18 +116,6 @@ fun BlocklyEditorScreen(
                 modifier = Modifier.fillMaxSize()
             )
             
-            // Save Dialog
-//            if (uiState.showSaveDialog) {
-//                SaveProjectDialog(
-//                    projectName = uiState.projectName,
-//                    projectDescription = uiState.projectTipe,
-//                    onNameChange = viewModel::updateProjectName,
-//                    onDescriptionChange = viewModel::updateProjectTipe,
-//                    onSave = { viewModel.saveProject() },
-//                    onDismiss = viewModel::hideSaveDialog
-//                )
-//            }
-            
             // Code Preview Dialog
             if (uiState.showCodePreview) {
                 CodePreviewDialog(
@@ -135,56 +125,6 @@ fun BlocklyEditorScreen(
             }
         }
     }
-}
-
-@Composable
-fun SaveProjectDialog(
-    projectName: String,
-    projectDescription: String,
-    onNameChange: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit,
-    onSave: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Simpan Proyek") },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = projectName,
-                    onValueChange = onNameChange,
-                    label = { Text("Nama Proyek") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                )
-                
-                OutlinedTextField(
-                    value = projectDescription,
-                    onValueChange = onDescriptionChange,
-                    label = { Text("Deskripsi") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = onSave) {
-                Text("Simpan")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Batal")
-            }
-        }
-    )
 }
 
 @Composable
@@ -285,7 +225,7 @@ private fun createWebView(
                 viewModel.onWorkspaceSaved(xml, inoCode) 
             },
             onShowSaveDialog = { 
-                viewModel.showSaveDialog() 
+                viewModel.showCodePreview() 
             },
             webView = this
         )

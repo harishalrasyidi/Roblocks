@@ -34,19 +34,10 @@ class ProjectIOTViewModel @Inject constructor(
     private var currentWorkspaceXml: String? = null
     private var currentGeneratedCode: String? = null
     
-    // Show/hide save dialog
+    // Show/hide save dialog - Keep for compatibility with JS
     fun showSaveDialog() {
-        _uiState.value = _uiState.value.copy(
-            showSaveDialog = true
-        )
-    }
-    
-    fun hideSaveDialog() {
-        _uiState.value = _uiState.value.copy(
-            showSaveDialog = false,
-            projectName = "",
-            projectTipe = ""
-        )
+        // Redirect to code preview instead of save dialog
+        showCodePreview()
     }
     
     // Show/hide code preview
@@ -70,22 +61,23 @@ class ProjectIOTViewModel @Inject constructor(
         )
     }
     
-    // Update project details in UI state
-    fun updateProjectName(name: String) {
-        _uiState.value = _uiState.value.copy(
-            projectName = name
-        )
-    }
-    
-    fun updateProjectTipe(tipe: String) {
-        _uiState.value = _uiState.value.copy(
-            projectTipe = tipe
-        )
-    }
-    
     // Called from BlocklyBridge when workspace is saved
     fun onWorkspaceSaved(xml: String, inoCode: String) {
         Log.d(TAG, "Workspace XML and generated code received")
+        
+        // Validasi konten XML sebelum disimpan
+        if (xml.isBlank() || !xml.trim().startsWith("<xml")) {
+            Log.e(TAG, "Invalid XML received: $xml")
+            _uiState.value = _uiState.value.copy(
+                showToast = true,
+                toastMessage = "Error: XML data tidak valid"
+            )
+            return
+        }
+        
+        // Log XML untuk debugging
+        Log.d(TAG, "XML to save: ${if(xml.length > 100) xml.substring(0, 100) + "..." else xml}")
+        
         currentWorkspaceXml = xml
         currentGeneratedCode = inoCode
         
@@ -95,6 +87,11 @@ class ProjectIOTViewModel @Inject constructor(
                 generatedCode = inoCode
             )
         }
+
+        // Jika proyek sudah ada (edit mode), update proyek langsung
+        if (_uiState.value.currentProjectId != null) {
+            updateProject(_uiState.value.currentProjectId!!, xml, inoCode)
+        }
     }
 
     fun getAllProject(): Flow<List<ProjectIOTEntity>> {
@@ -103,14 +100,10 @@ class ProjectIOTViewModel @Inject constructor(
     
     // Save project to Room DB and internal storage
     fun saveProject(projectName: String, projectTipe: String) {
-        if (currentWorkspaceXml == null || currentGeneratedCode == null) {
-            _uiState.value = _uiState.value.copy(
-                showToast = true,
-                toastMessage = "Tidak ada kode yang tersedia untuk disimpan"
-            )
-            return
-        }
-
+        // Jika dipanggil saat pembuatan proyek awal, workspace dan code mungkin kosong
+        val initialWorkspaceXml = currentWorkspaceXml ?: "<xml xmlns=\"https://developers.google.com/blockly/xml\"></xml>"
+        val initialArduinoCode = currentGeneratedCode ?: "// Arduino code for ${projectName}\n// Project type: ${projectTipe}\n\nvoid setup() {\n  // Setup code here\n}\n\nvoid loop() {\n  // Main code here\n}\n"
+        
         if (projectName.isBlank()) {
             _uiState.value = _uiState.value.copy(
                 showToast = true,
@@ -125,26 +118,75 @@ class ProjectIOTViewModel @Inject constructor(
                 val project = repository.saveProject(
                     name = projectName,
                     tipe = projectTipe,
-                    blocklyXml = currentWorkspaceXml!!,
-                    arduinoCode = currentGeneratedCode!!
+                    blocklyXml = initialWorkspaceXml,
+                    arduinoCode = initialArduinoCode
                 )
                 
                 // Save Arduino code to internal storage (.ino file)
-                saveArduinoCodeToFile(project, currentGeneratedCode!!)
+                saveArduinoCodeToFile(project, initialArduinoCode)
                 
-//                _uiState.value = _uiState.value.copy(
-//                    showSaveDialog = false,
-//                    showToast = true,
-//                    toastMessage = "Proyek tersimpan",
-//                    projectName = "",
-//                    projectTipe = ""
-//                )
+                _uiState.value = _uiState.value.copy(
+                    showToast = true,
+                    toastMessage = "Proyek baru tersimpan",
+                    currentProjectId = project.id.toString()
+                )
                 
             } catch (e: Exception) {
                 Log.e(TAG, "Error saving project", e)
                 _uiState.value = _uiState.value.copy(
                     showToast = true,
                     toastMessage = "Gagal menyimpan proyek: ${e.message}"
+                )
+            }
+        }
+    }
+    
+    // Update project dengan workspace dan code terbaru
+    fun updateProject(projectId: String, blocklyXml: String, arduinoCode: String) {
+        if (blocklyXml.isBlank() || !blocklyXml.trim().startsWith("<xml")) {
+            Log.e(TAG, "Invalid XML format in updateProject: $blocklyXml")
+            _uiState.value = _uiState.value.copy(
+                showToast = true,
+                toastMessage = "Workspace tidak valid"
+            )
+            return
+        }
+        
+        viewModelScope.launch {
+            try {
+                // Get existing project
+                val existingProject = repository.getProjectById(projectId)
+                
+                if (existingProject != null) {
+                    // Update project with new workspace and code
+                    val updatedProject = existingProject.copy(
+                        workspace_xml = blocklyXml,
+                        updated_at = System.currentTimeMillis()
+                    )
+                    
+                    // Log before updating
+                    Log.d(TAG, "Updating project ${existingProject.id} with new XML: ${blocklyXml.substring(0, minOf(100, blocklyXml.length))}...")
+                    
+                    repository.updateProject(updatedProject)
+                    
+                    // Update Arduino code file
+                    saveArduinoCodeToFile(existingProject, arduinoCode)
+                    
+                    _uiState.value = _uiState.value.copy(
+                        showToast = true,
+                        toastMessage = "Proyek berhasil diperbarui"
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        showToast = true,
+                        toastMessage = "Proyek tidak ditemukan"
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating project", e)
+                _uiState.value = _uiState.value.copy(
+                    showToast = true,
+                    toastMessage = "Gagal memperbarui proyek: ${e.message}"
                 )
             }
         }
@@ -159,7 +201,17 @@ class ProjectIOTViewModel @Inject constructor(
         
         // Save generated Arduino code (.ino file)
         val arduinoFile = File(filesDir, project.file_source_code)
-        writeToFile(arduinoFile, generatedCode)
+        
+        try {
+            writeToFile(arduinoFile, generatedCode)
+            Log.d(TAG, "Arduino code saved to ${arduinoFile.absolutePath}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving Arduino code to file", e)
+            _uiState.value = _uiState.value.copy(
+                showToast = true,
+                toastMessage = "Error saving code: ${e.message}"
+            )
+        }
     }
     
     private fun writeToFile(file: File, content: String) {

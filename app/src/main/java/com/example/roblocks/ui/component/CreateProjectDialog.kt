@@ -13,7 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.roblocks.blockly.SaveProjectDialog
 import com.example.roblocks.data.entities.ProjectIOTEntity
 import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 
@@ -25,6 +24,7 @@ fun insertNamaProyek(
     navController: NavController
 ){
     val namaProyek = remember { mutableStateOf("") }
+    val deskripsiProyek = remember { mutableStateOf("") }
     val projectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
     AlertDialog(
         containerColor = Color(0xFFA199FF),
@@ -73,15 +73,54 @@ fun insertNamaProyek(
                             ),
                             shape = RoundedCornerShape(8.dp),
                         )
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        Text(
+                            text = "Deskripsi Proyek",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color = Color.White,
+                                fontSize = 16.sp,
+                            ),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        TextField(
+                            value = deskripsiProyek.value,
+                            textStyle = MaterialTheme.typography.titleMedium.copy(
+                                color = Color.Black,
+                                fontSize = 16.sp,
+                            ),
+                            onValueChange = { deskripsiProyek.value = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Masukkan Deskripsi Proyek") },
+                            colors = TextFieldDefaults.colors(
+                                unfocusedContainerColor = Color.White,
+                                focusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Magenta,
+                                unfocusedIndicatorColor = Color.Magenta,
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                        )
                     }
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = {
-                onDismiss()
-                navController.navigate(route)
-                projectIOTViewModel.saveProject(namaProyek.toString(), title)
+                if (namaProyek.value.isNotBlank()) {
+                    // Simpan proyek ke database
+                    projectIOTViewModel.saveProject(namaProyek.value, title)
+                    
+                    // Navigasi kembali ke halaman robotics_screen alih-alih ke editor blockly
+                    navController.navigate("robotics_screen") {
+                        // Hapus semua halaman sebelumnya dari back stack
+                        popUpTo("robotics_screen") { inclusive = true }
+                    }
+                    
+                    // Tutup dialog
+                    onDismiss()
+                }
             }) {
                 Text(
                     "Buat Proyek",
