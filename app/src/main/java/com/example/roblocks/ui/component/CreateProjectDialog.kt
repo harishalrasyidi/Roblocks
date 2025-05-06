@@ -14,18 +14,24 @@ import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.roblocks.blockly.SaveProjectDialog
+import com.example.roblocks.data.entities.ProjectAIEntity
+import com.example.roblocks.data.entities.ProjectEntity
 import com.example.roblocks.data.entities.ProjectIOTEntity
 import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
+import com.example.roblocks.domain.viewModel.RoblocksViewModel
+import java.util.UUID
 
 @Composable
-fun insertNamaProyek(
+fun InsertNamaProyek(
     title: String,
     route: String,
     onDismiss: () -> Unit,
-    navController: NavController
-){
+    navController: NavController,
+    projectType: String
+) {
     val namaProyek = remember { mutableStateOf("") }
-    val projectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
+    val projectIOTViewModel: ProjectIOTViewModel = hiltViewModel()
+    val roblocksViewModel: RoblocksViewModel = hiltViewModel()
     AlertDialog(
         containerColor = Color(0xFFA199FF),
         onDismissRequest = onDismiss,
@@ -80,8 +86,35 @@ fun insertNamaProyek(
         confirmButton = {
             TextButton(onClick = {
                 onDismiss()
+
+                val newProject = if (projectType == "IOT") {
+                    ProjectIOTEntity(
+                        id = UUID.randomUUID().toString(),
+                        name = namaProyek.value,
+                        tipe = title,
+                        workspace_xml = "",
+                        file_block_code = "",
+                        file_source_code = "",
+                        created_at = System.currentTimeMillis(),
+                        updated_at = System.currentTimeMillis()
+                    )
+                } else {
+                    ProjectAIEntity(
+                        id = UUID.randomUUID().toString(),
+                        name = namaProyek.value,
+                        tipe = title,
+                        file_source_proyek_AI = "", // path to AI model
+                        created_at = System.currentTimeMillis(),
+                        updated_at = System.currentTimeMillis(),
+                        workspace_xml = "", // Blockly XML
+                        id_siswa = "current_user_id"
+                    )
+                }
+
+                roblocksViewModel.saveProject(newProject)
                 navController.navigate(route)
-                projectIOTViewModel.saveProject(namaProyek.toString(), title)
+
+
             }) {
                 Text(
                     "Buat Proyek",
@@ -106,13 +139,15 @@ fun insertNamaProyek(
     )
 }
 
+
 @Composable
-fun cardJenisProyek(
+fun CardJenisProyek(
     title: String,
     icon: Int,
     description: String,
     route: String,
-    navController: NavController
+    navController: NavController,
+    projectType: String
 ) {
     var inputNamaProyek by remember { mutableStateOf(false) }
 
@@ -215,8 +250,8 @@ fun cardJenisProyek(
                         )
 
                     }
-                if(inputNamaProyek == true){
-                    insertNamaProyek(title, route, onDismiss = {inputNamaProyek = false}, navController)
+                if(inputNamaProyek){
+                    InsertNamaProyek(title, route, onDismiss = {inputNamaProyek = false}, navController, projectType)
                 }
             }
         }

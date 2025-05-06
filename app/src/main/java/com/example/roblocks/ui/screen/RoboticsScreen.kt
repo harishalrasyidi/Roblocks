@@ -16,7 +16,7 @@ import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 import com.example.roblocks.ui.component.ArticleCard
 import com.example.roblocks.ui.BottomNavBar
 import com.example.roblocks.ui.component.ProjectCard
-import com.example.roblocks.ui.component.cardJenisProyek
+import com.example.roblocks.ui.component.CardJenisProyek
 import androidx.compose.runtime.collectAsState
 
 @Composable
@@ -111,11 +111,11 @@ fun CreateProjectDialogRobotics(onDismiss: () -> Unit, navController: NavControl
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        cardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController)
+                        CardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController, "IOT")
                         Spacer(modifier = Modifier.height(6.dp))
-                        cardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController)
+                        CardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController, "IOT")
                         Spacer(modifier = Modifier.height(6.dp))
-                        cardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController)
+                        CardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController, "IOT")
                     }
                 }
             }

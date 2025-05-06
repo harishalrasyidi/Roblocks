@@ -1,5 +1,6 @@
 package com.example.roblocks.ui.component
 
+import android.graphics.Paint.Align
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
@@ -15,7 +16,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
@@ -27,6 +32,7 @@ import androidx.navigation.NavController
 import com.example.roblocks.R
 import com.example.roblocks.data.entities.ProjectEntity
 import com.example.roblocks.data.entities.ProjectIOTEntity
+import com.example.roblocks.domain.viewModel.ProjectAIViewModel
 import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 import com.example.roblocks.ui.screen.CreateProjectDialogAI
 import com.example.roblocks.ui.screen.CreateProjectDialogRobotics
@@ -44,7 +50,9 @@ fun<T: ProjectEntity> ProjectCard(
 ) {
     var showCreateProject by remember { mutableStateOf(false) }
 
-    val ProjectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
+    val projectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
+    val projectAIViewModel: ProjectAIViewModel = hiltViewModel()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -164,15 +172,33 @@ fun<T: ProjectEntity> ProjectCard(
                         ) {
                             projectList.forEach {
                                 Button(
-                                    onClick = { print("Being Clicked") },
-                                    modifier = Modifier.width(250.dp).height(IntrinsicSize.Min),
+                                    onClick =
+                                    {
+                                        if(jenisProyek == "Robotics"){
+                                            projectIOTViewModel.loadProject(it.id)
+                                        }
+                                        else{
+                                            print("testBrow")
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .width(250.dp)
+                                        .height(IntrinsicSize.Min)
+                                        .shadow(
+                                            elevation = 8.dp,
+                                            ambientColor = Color.Gray,
+                                            spotColor = Color.DarkGray,
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                    ,
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color(
                                             0xFF2F88FF
                                         )
                                     ),
                                     shape = RoundedCornerShape(14.dp),
-                                    border = BorderStroke(1.dp, Color.White)
+//                                    border = BorderStroke(0.2.dp, Color.White),
+
                                 ) {
                                     //konten untuk tombol
                                     Row(
@@ -182,7 +208,7 @@ fun<T: ProjectEntity> ProjectCard(
                                     ) {
                                         Column {
                                             Row(
-                                                modifier = Modifier.weight(1f),
+                                                modifier = Modifier.weight(2f),
                                                 horizontalArrangement = Arrangement.Start
                                             ) {
                                                 Text(
@@ -248,6 +274,7 @@ fun<T: ProjectEntity> ProjectCard(
                                             painter = painterResource(id = R.drawable.open_proyek_illustration),
                                             contentDescription = "Buka Proyek",
                                             modifier = Modifier
+                                                .align(Alignment.CenterVertically)
                                                 .size(17.dp)
                                         )
                                     }
