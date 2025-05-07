@@ -317,29 +317,20 @@ fun TrainingSection(viewModel: ClassifierViewModel, context: Context) {
 }
 
 @Composable
-fun TestSection(viewModel: ClassifierViewModel,
-                context: Context,
-                imageClasses: StateFlow<List<ImageClass>>,
-                selectedClass: Int,
-                onAddImage: (Int, Bitmap) -> Unit,
-) {
+fun TestSection(viewModel: ClassifierViewModel, context: Context, onClassifyImage: (Bitmap) -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val context = LocalContext.current
-    val classes by imageClasses.collectAsState()
-
-    // Create a temporary file for the camera output
     val outputDirectory = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     val photoFile = remember {
         File.createTempFile("photo_${System.currentTimeMillis()}", ".jpg", outputDirectory).apply {
-            deleteOnExit() // Optional: Clean up the file when the app exits
+            deleteOnExit()
         }
     }
 
     val photoUri = remember {
         FileProvider.getUriForFile(
             context,
-            "${context.packageName}.fileprovider", // Matches the authority in AndroidManifest.xml
+            "${context.packageName}.fileprovider",
             photoFile
         )
     }
@@ -350,12 +341,8 @@ fun TestSection(viewModel: ClassifierViewModel,
         onResult = { success ->
             if (success) {
                 val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-                val currentClass = classes.indexOfFirst { it.name == "Class $selectedClass" }
-                if (currentClass != -1) {
-                    onAddImage(currentClass, bitmap)
-                }
+                onClassifyImage(bitmap)
             } else {
-                // Handle failure (e.g., user canceled)
                 Log.d("Camera", "Photo capture failed or canceled")
             }
         }
@@ -367,14 +354,10 @@ fun TestSection(viewModel: ClassifierViewModel,
     ) { uri: Uri? ->
         uri?.let {
             getBitmapFromUri(context, it)?.let { bmp ->
-                val currentClass = classes.indexOfFirst { it.name == "Class $selectedClass" }
-                if (currentClass != -1) {
-                    onAddImage(currentClass, bmp)
-                }
+                onClassifyImage(bmp)
             }
         }
     }
-
 
     Card(
         colors = CardDefaults.cardColors(containerColor = Color(0xFF2FCEEA)),
@@ -407,8 +390,8 @@ fun TestSection(viewModel: ClassifierViewModel,
                                 takePictureLauncher.launch(photoUri)
                             },
                             modifier = Modifier
-                                .size(32.dp) // Square shape
-                                .clip(RoundedCornerShape(8.dp)) // Slightly rounded corners
+                                .size(32.dp)
+                                .clip(RoundedCornerShape(8.dp))
                                 .background(Color.White)
                         ) {
                             Icon(
@@ -427,14 +410,14 @@ fun TestSection(viewModel: ClassifierViewModel,
                                 getImagePicker.launch("image/*")
                             },
                             modifier = Modifier
-                                .size(32.dp) // Square shape
-                                .clip(RoundedCornerShape(8.dp)) // Slightly rounded corners
-                                .background(Color.White) // White background
+                                .size(32.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.White)
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.add_image_image_classification),
                                 contentDescription = "Add Image",
-                                modifier = Modifier.size(24.dp), // Adjusted size to fit
+                                modifier = Modifier.size(24.dp),
                                 tint = Color(0xFF2FCEEA)
                             )
                         }
@@ -617,11 +600,9 @@ fun ImageClassifierApp(navController: NavController) {
             TestSection(
                 viewModel,
                 context,
-                imageClasses = viewModel.imageClasses,
-                selectedClass = uiState.selectedClass,
-                onAddImage = { classIndex, bitmap ->
-                    viewModel.addImageToClass(classIndex, bitmap)
-                },
+                onClassifyImage = { bitmap ->
+                    viewModel.classifyImage(bitmap, context)
+                }
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
