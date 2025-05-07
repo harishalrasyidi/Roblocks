@@ -19,7 +19,10 @@ interface ProjectAIDao {
     fun getProjectNewest(): ProjectAIEntity
 
     @Query("SELECT * FROM ProyekAI_table WHERE id = :id")
-    fun getProjectById(id: String): ProjectAIEntity?
+    fun getProjectById(id: String): ProjectAIEntity
+
+    @Query("DELETE FROM ProyekAI_table WHERE id = :id")
+    fun deleteProjectById(id: String): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProject(project: ProjectAIEntity)
