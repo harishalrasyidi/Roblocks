@@ -9,6 +9,7 @@ import java.io.File
 import java.util.zip.ZipFile
 
 interface ProjectAIRepository {
+    fun getProjectNewest(): ProjectAIEntity
     fun getAllProjects(): Flow<List<ProjectAIEntity>>
     suspend fun getProjectById(id: String): ProjectAIEntity?
     suspend fun saveProject(

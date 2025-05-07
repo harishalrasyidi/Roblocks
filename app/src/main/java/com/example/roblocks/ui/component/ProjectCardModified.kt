@@ -164,9 +164,13 @@ fun<T: ProjectEntity> ProjectCardModified(
                         ) {
                             projectList.forEach {
                                 Button(
-                                    onClick = { 
-                                        // Navigasi ke BlocklyEditorScreen dengan ID proyek
-                                        navController.navigate("blockly_editor_screen?projectId=${it.id}")
+                                    onClick = {
+                                        if(it.tipe == "IOT"){
+                                            navController.navigate("blockly_editor_screen?projectId=${it.id}")
+                                        }
+                                        else if(jenisProyek == "Klasifikasi Gambar"){
+                                            navController.navigate("image_classfier?projectID=${it.id}")
+                                        }
                                     },
                                     modifier = Modifier.width(250.dp).height(IntrinsicSize.Min),
                                     colors = ButtonDefaults.buttonColors(
@@ -175,7 +179,7 @@ fun<T: ProjectEntity> ProjectCardModified(
                                         )
                                     ),
                                     shape = RoundedCornerShape(14.dp),
-                                    border = BorderStroke(1.dp, Color.White)
+                                    border = BorderStroke(0.2.dp, Color.White)
                                 ) {
                                     //konten untuk tombol
                                     Row(

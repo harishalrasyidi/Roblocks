@@ -1,6 +1,5 @@
 package com.example.roblocks.ui.component
 
-import android.graphics.Paint.Align
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
@@ -16,11 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.focusModifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
@@ -32,7 +27,6 @@ import androidx.navigation.NavController
 import com.example.roblocks.R
 import com.example.roblocks.data.entities.ProjectEntity
 import com.example.roblocks.data.entities.ProjectIOTEntity
-import com.example.roblocks.domain.viewModel.ProjectAIViewModel
 import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 import com.example.roblocks.ui.screen.CreateProjectDialogAI
 import com.example.roblocks.ui.screen.CreateProjectDialogRobotics
@@ -50,9 +44,7 @@ fun<T: ProjectEntity> ProjectCard(
 ) {
     var showCreateProject by remember { mutableStateOf(false) }
 
-    val projectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
-    val projectAIViewModel: ProjectAIViewModel = hiltViewModel()
-
+    val ProjectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -172,33 +164,22 @@ fun<T: ProjectEntity> ProjectCard(
                         ) {
                             projectList.forEach {
                                 Button(
-                                    onClick =
-                                    {
-                                        if(jenisProyek == "Robotics"){
-                                            projectIOTViewModel.loadProject(it.id)
+                                    onClick = {
+                                        if(jenisProyek == "IOT"){
+                                            navController.navigate("blockly_editor_screen?projectId=${it.id}")
                                         }
                                         else{
-                                            print("testBrow")
+                                            navController.navigate("ml_image?projectID=${it.id}")
                                         }
                                     },
-                                    modifier = Modifier
-                                        .width(250.dp)
-                                        .height(IntrinsicSize.Min)
-                                        .shadow(
-                                            elevation = 8.dp,
-                                            ambientColor = Color.Gray,
-                                            spotColor = Color.DarkGray,
-                                            shape = RoundedCornerShape(8.dp)
-                                        )
-                                    ,
+                                    modifier = Modifier.width(250.dp).height(IntrinsicSize.Min),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color(
                                             0xFF2F88FF
                                         )
                                     ),
                                     shape = RoundedCornerShape(14.dp),
-//                                    border = BorderStroke(0.2.dp, Color.White),
-
+                                    border = BorderStroke(0.2.dp, Color.White)
                                 ) {
                                     //konten untuk tombol
                                     Row(
@@ -208,7 +189,7 @@ fun<T: ProjectEntity> ProjectCard(
                                     ) {
                                         Column {
                                             Row(
-                                                modifier = Modifier.weight(2f),
+                                                modifier = Modifier.weight(1f),
                                                 horizontalArrangement = Arrangement.Start
                                             ) {
                                                 Text(
@@ -274,7 +255,6 @@ fun<T: ProjectEntity> ProjectCard(
                                             painter = painterResource(id = R.drawable.open_proyek_illustration),
                                             contentDescription = "Buka Proyek",
                                             modifier = Modifier
-                                                .align(Alignment.CenterVertically)
                                                 .size(17.dp)
                                         )
                                     }
@@ -359,13 +339,7 @@ fun<T: ProjectEntity> ProjectCard(
                                             .offset(x = 3.dp, y = 1.dp)
                                     )
                                 }
-        //                        if(showCreateProject == true) {
-        //                            if(jenisProyek == "AI")
-        //                                CreateProjectDialogAI(onDismiss = { showCreateProject = false }, navController = navController)
-        //                            else
-        //                                CreateProjectDialogRobotics(onDismiss = { showCreateProject = false}, navController = navController)
-        //                        }
-                                    }
+                            }
                         }
                     }
                 }
@@ -442,7 +416,7 @@ fun<T: ProjectEntity> ProjectCard(
                             horizontalArrangement = Arrangement.Start
                         ) {
                             Text(
-                                "Buat Projek Baru",
+                                "Edit Projek",
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     color = Color.White,
                                     fontSize = 14.sp,
@@ -454,23 +428,15 @@ fun<T: ProjectEntity> ProjectCard(
 
                             Image(
                                 painter = painterResource(id = R.drawable.edit_proyek_illustration),
-                                contentDescription = "Tambah Project Illustration",
+                                contentDescription = "Edit Project Illustration",
                                 modifier = Modifier
                                     .size(17.dp)
                                     .offset(x = 3.dp, y = 1.dp)
                             )
                         }
-//                        if(showCreateProject == true) {
-//                            if(jenisProyek == "AI")
-//                                CreateProjectDialogAI(onDismiss = { showCreateProject = false }, navController = navController)
-//                            else
-//                                CreateProjectDialogRobotics(onDismiss = { showCreateProject = false}, navController = navController)
-//                        }
                     }
-                }
                 }
             }
         }
     }
-
-
+}

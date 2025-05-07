@@ -61,6 +61,23 @@ class MainActivity : ComponentActivity() {
                     composable("learn_screen") {
                         LearnScreen(navController = navController)
                     }
+                    composable(
+                        route = "ml_image?projectID={projectID}",
+                        arguments = listOf(
+                            navArgument("projectID") {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            }
+                        )
+                    ){
+                        backStackEntry ->
+                        val projectID = backStackEntry.arguments?.getString("projectID")
+                        ImageClassifierApp(
+                            navController = navController,
+                            projectID = projectID
+                        )
+                    }
                     composable("ml_image"){
                         ImageClassifierApp(navController = navController)
                     }
