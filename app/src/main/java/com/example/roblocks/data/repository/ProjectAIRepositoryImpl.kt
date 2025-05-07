@@ -116,4 +116,8 @@ class ProjectAIRepositoryImpl @Inject constructor(
     override suspend fun deleteProject(project: ProjectAIEntity) {
         projectAIDao.deleteProject(project)
     }
+
+    override suspend fun deleteProjectByID(id: String){
+        projectAIDao.deleteProjectById(id)
+    }
 }

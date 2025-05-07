@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.example.roblocks.data.entities.ProjectAIEntity
 import com.example.roblocks.data.entities.ProjectIOTEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -19,6 +20,9 @@ interface ProjectIOTDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProject(project: ProjectIOTEntity)
+
+    @Query("DELETE FROM ProyekRobot_table WHERE id = :id")
+    fun deleteProjectById(id: String): Int
     
     @Update
     suspend fun updateProject(project: ProjectIOTEntity)

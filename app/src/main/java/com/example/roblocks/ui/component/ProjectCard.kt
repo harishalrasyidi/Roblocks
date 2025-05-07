@@ -30,6 +30,7 @@ import com.example.roblocks.data.entities.ProjectIOTEntity
 import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 import com.example.roblocks.ui.screen.CreateProjectDialogAI
 import com.example.roblocks.ui.screen.CreateProjectDialogRobotics
+import com.example.roblocks.ui.screen.EditProjectDialog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEmpty
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
@@ -43,6 +44,8 @@ fun<T: ProjectEntity> ProjectCard(
     projectList: List<T>
 ) {
     var showCreateProject by remember { mutableStateOf(false) }
+    var showEditProject by remember { mutableStateOf(false) }
+
 
     val ProjectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
     Card(
@@ -152,6 +155,13 @@ fun<T: ProjectEntity> ProjectCard(
                                         CreateProjectDialogRobotics(onDismiss = {
                                             showCreateProject = false
                                         }, navController)
+                                }
+
+                                if(showEditProject == true) {
+                                    if(jenisProyek == "AI")
+                                        EditProjectDialog(onDismiss = { showCreateProject = false }, navController = navController, "AI")
+                                    else
+                                        EditProjectDialog(onDismiss = { showCreateProject = false}, navController = navController, "IOT")
                                 }
                             }
                         }
@@ -308,10 +318,17 @@ fun<T: ProjectEntity> ProjectCard(
                                             showCreateProject = false
                                         }, navController)
                                 }
+
+                                if(showEditProject == true) {
+                                    if(jenisProyek == "AI")
+                                        EditProjectDialog(onDismiss = { showCreateProject = false }, navController = navController, "AI")
+                                    else
+                                        EditProjectDialog(onDismiss = { showCreateProject = false}, navController = navController, "IOT")
+                                }
                             }
 
                             Button(
-                                onClick = { showCreateProject = true },
+                                onClick = { showEditProject = true },
                                 modifier = Modifier.width(200.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF4C543)),
                                 shape = RoundedCornerShape(14.dp)
@@ -403,10 +420,18 @@ fun<T: ProjectEntity> ProjectCard(
                             else
                                 CreateProjectDialogRobotics(onDismiss = { showCreateProject = false}, navController = navController)
                         }
+
+                        if(showEditProject == true) {
+                            if(jenisProyek == "AI")
+                                EditProjectDialog(onDismiss = { showCreateProject = false }, navController = navController, "AI")
+                            else
+                                EditProjectDialog(onDismiss = { showCreateProject = false}, navController = navController, "IOT")
+                        }
+
                     }
 
                     Button(
-                        onClick = { showCreateProject = true },
+                        onClick = { showEditProject = true },
                         modifier = Modifier.width(200.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF4C543)),
                         shape = RoundedCornerShape(14.dp)

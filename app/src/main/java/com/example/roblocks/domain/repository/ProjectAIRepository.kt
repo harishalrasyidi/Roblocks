@@ -27,4 +27,5 @@ interface ProjectAIRepository {
         modelFile: File,
         datasetDir: File
     ): File
+    suspend fun deleteProjectByID(id: String)
 }

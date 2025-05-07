@@ -314,6 +314,12 @@ class ProjectIOTViewModel @Inject constructor(
     companion object {
         private const val TAG = "BlocklyViewModel"
     }
+
+    fun deleteProjectByID(id: String) {
+        viewModelScope.launch {
+            repository.deleteProjectByID(id)
+        }
+    }
 }
 
 /**

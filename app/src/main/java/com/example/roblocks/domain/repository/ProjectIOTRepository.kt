@@ -15,4 +15,6 @@ interface ProjectIOTRepository {
     suspend fun insertProject(project: ProjectIOTEntity)
     suspend fun updateProject(project: ProjectIOTEntity)
     suspend fun deleteProject(project: ProjectIOTEntity)
+    suspend fun deleteProjectByID(id: String)
+
 }

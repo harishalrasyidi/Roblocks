@@ -61,4 +61,8 @@ class ProjectIOTRepositoryImpl @Inject constructor(
     override suspend fun deleteProject(project: ProjectIOTEntity) {
         projectIOTDao.deleteProject(project)
     }
+
+    override suspend fun deleteProjectByID(id: String) {
+        projectIOTDao.deleteProjectById(id)
+    }
 }

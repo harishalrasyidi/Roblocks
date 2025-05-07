@@ -134,6 +134,12 @@ class ProjectAIViewModel @Inject constructor(
     fun getAllProject(): Flow<List<ProjectAIEntity>> {
         return (repository.getAllProjects())
     }
+
+    fun deleteProjectByID(id: String) {
+        viewModelScope.launch {
+            repository.deleteProjectByID(id)
+        }
+    }
 }
 
 data class ProjectAIUiState(
