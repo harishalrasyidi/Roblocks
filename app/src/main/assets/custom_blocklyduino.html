@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Roblocks - BlocklyDuino</title>
+    
+    <!-- Injecting BlocklyDuino files -->
+    <script src="./BlocklyDuino/blockly/blockly_compressed.js"></script>
+    <script src="./BlocklyDuino/blockly/blocks_compressed.js"></script>
+    <script src="./BlocklyDuino/blockly/arduino_compressed.js"></script>
+    <script src="./BlocklyDuino/blockly/msg/js/en.js"></script>
+    <script src="./BlocklyDuino/blockly/apps/blocklyduino/Blob.js"></script>
+    <script src="./BlocklyDuino/blockly/apps/blocklyduino/FileSaver.min.js"></script>
+    <script src="./BlocklyDuino/blockly/apps/blocklyduino/blockly_helper.js"></script>
+    
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+        
+        #blocklyArea {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding-bottom: 60px;
+        }
+        
+        #blocklyDiv {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        .action-button {
+            position: fixed;
+            bottom: 20px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            color: white;
+            z-index: 1000;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            width: 23%;
+            text-align: center;
+            font-weight: bold;
+            line-height: 1.2;
+            min-height: 40px;
+            max-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #previewCodeButton {
+            right: auto;
+            left: 1%;
+            background-color: #673AB7;
+        }
+        
+        #previewXmlButton {
+            right: auto;
+            left: 26%;
+            background-color: #9C27B0;
+        }
+        
+        #uploadButton {
+            right: auto;
+            left: 51%;
+            background-color: #d43;
+        }
+
+        #saveButton {
+            right: auto;
+            left: 76%;
+            background-color: #4285F4;
+        }
+        
+        #previewModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 700px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .code-container {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 400px;
+            margin-bottom: 15px;
+        }
+        
+        .close-button {
+            padding: 8px 16px;
+            background-color: #673AB7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+
+        /* Hidden elements */
+        .content-hidden {
+            display: none;
+        }
+        
+        /* Responsive styles for mobile */
+        @media (max-width: 768px) {
+            .action-button {
+                font-size: 12px;
+                padding: 8px 4px;
+                bottom: 10px;
+                width: 22%;
+                min-height: 36px;
+                max-height: 40px;
+            }
+            
+            #previewCodeButton {
+                left: 2%;
+            }
+            
+            #previewXmlButton {
+                left: 26%;
+            }
+            
+            #uploadButton {
+                left: 50%;
+            }
+            
+            #saveButton {
+                left: 74%;
+            }
+            
+            /* Smaller modal for mobile */
+            .modal-content {
+                margin: 5% auto;
+                padding: 15px;
+                width: 90%;
+            }
+            
+            .code-container {
+                max-height: 300px;
+            }
+        }
+        
+        /* Even smaller devices */
+        @media (max-width: 320px) {
+            .action-button {
+                font-size: 11px;
+                padding: 6px 2px;
+                width: 22%;
+                min-height: 32px;
+                max-height: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Content placeholders for Arduino and XML views -->
+    <textarea id="content_arduino" class="content-hidden" readonly wrap="off"></textarea>
+    <textarea id="content_xml" class="content-hidden" wrap="off"></textarea>
+
+    <!-- Main visible area -->
+    <div id="blocklyArea">
+        <div id="blocklyDiv"></div>
+    </div>
+    
+    <!-- Controls -->
+    <button id="uploadButton" class="action-button">Upload</button>
+    <button id="previewCodeButton" class="action-button">Preview Code</button>
+    <button id="previewXmlButton" class="action-button">Preview XML</button>
+    <button id="saveButton" class="action-button">Save</button>
+    
+    <!-- Code Preview Modal -->
+    <div id="previewModal">
+        <div class="modal-content">
+            <div id="modalTitle" class="modal-title">Arduino Code Preview</div>
+            <pre id="codeContainer" class="code-container"></pre>
+            <button id="closePreview" class="close-button">Close</button>
+        </div>
+    </div>
+    
+    <!-- XML for toolbox -->
+    <xml id="toolbox" style="display: none">
+        <category name="Logic">
+            <block type="controls_if"></block>
+            <block type="logic_compare"></block>
+            <block type="logic_operation"></block>
+            <block type="logic_negate"></block>
+            <block type="logic_null"></block>
+        </category>
+        <category name="Control">
+            <block type="base_delay">
+                <value name="DELAY_TIME">
+                <block type="math_number">
+                    <field name="NUM">1000</field>
+                </block>
+                </value>
+            </block>
+            <block type="controls_for">
+                <value name="FROM">
+                <block type="math_number">
+                    <field name="NUM">1</field>
+                </block>
+                </value>
+                <value name="TO">
+                <block type="math_number">
+                    <field name="NUM">10</field>
+                </block>
+                </value>
+            </block>
+            <block type="controls_whileUntil"></block>
+        </category>
+        <category name="Math">
+            <block type="math_number"></block>
+            <block type="math_arithmetic"></block>
+            <block type="base_map">
+                <value name="DMAX">
+                <block type="math_number">
+                    <field name="NUM">180</field>
+                </block>
+                </value>
+            </block>
+        </category>
+        <category name="Text">
+            <block type="text"></block>
+        </category>
+        <category name="Variables" custom="VARIABLE"></category>
+        <category name="Functions" custom="PROCEDURE"></category>
+        <sep></sep>
+        <category name="Input/Output">
+            <block type="inout_highlow"></block>
+            <block type="inout_digital_write"></block>
+            <block type="inout_digital_read"></block>
+            <block type="inout_analog_write">
+                <value name="NUM">
+                <block type="math_number">
+                    <field name="NUM">0</field>
+                </block>
+                </value>
+            </block>
+            <block type="inout_analog_read"></block>
+            <block type="serial_print">
+                <value name="CONTENT">
+                <block type="text">
+                    <field name="TEXT"></field>
+                </block>
+                </value>
+            </block>
+            <block type="inout_tone">
+                <value name="NUM">
+                <block type="math_number">
+                    <field name="NUM">440</field>
+                </block>
+                </value>
+            </block>
+            <block type="inout_notone"></block>
+            <block type="inout_buildin_led"></block>
+        </category>
+        <category name="Servo">
+            <block type="servo_move">
+                <value name="DEGREE">
+                <block type="math_number">
+                    <field name="NUM">0</field>
+                </block>
+                </value>
+            </block>
+            <block type="servo_read_degrees"></block>
+        </category>
+        <category name="Grove Analog">
+            <block type="grove_rotary_angle"></block>
+            <block type="grove_temporature_sensor"></block>
+            <block type="grove_sound_sensor"></block>
+            <block type="grove_thumb_joystick"></block>
+        </category>
+        <category name="Grove">
+            <block type="grove_led"></block>
+            <block type="grove_button"></block>
+            <block type="grove_relay"></block>
+            <block type="grove_tilt_switch"></block>
+            <block type="grove_piezo_buzzer"></block>
+            <block type="grove_pir_motion_sensor"></block>
+            <block type="grove_line_finder"></block>
+            <block type="grove_rgb_led"></block>
+            <block type="grove_ultrasonic_ranger"></block>
+        </category>
+        <category name="Grove LCD">
+            <block type="grove_serial_lcd_print">
+                <value name="TEXT">
+                <block type="text">
+                    <field name="TEXT"></field>
+                </block>
+                </value>
+                <value name="TEXT2">
+                <block type="text">
+                    <field name="TEXT"></field>
+                </block>
+                </value>
+                <value name="DELAY_TIME">
+                <block type="math_number">
+                    <field name="NUM">1000</field>
+                </block>
+                </value>
+            </block>
+            <block type="grove_serial_lcd_power"></block>
+            <block type="grove_serial_lcd_effect"></block>
+        </category>
+        <category name="Grove Motor">
+            <block type="grove_motor_shield"></block>
+        </category>
+    </xml>
+    
+    <script>
+        // Global variables
+        var workspace = null;
+        var TABS_ = ['blocks', 'arduino', 'xml'];
+        var selected = 'blocks';
+        
+        // Initialize Blockly in our custom div
+        function initBlockly() {
+            // Init the main workspace
+            workspace = Blockly.inject('blocklyDiv', {
+                grid: {
+                    spacing: 25,
+                    length: 3,
+                    colour: '#ccc',
+                    snap: true
+                },
+                media: './BlocklyDuino/blockly/media/',
+                toolbox: document.getElementById('toolbox'),
+                zoom: {
+                    controls: true,
+                    wheel: true,
+                    startScale: 1.0,
+                    maxScale: 3,
+                    minScale: 0.3,
+                    scaleSpeed: 1.2
+                },
+                trashcan: true
+            });
+            
+            // Load any saved blocks or initialize with Arduino setup/loop blocks
+            loadDefaultBlocks();
+            
+            // Resize event handling
+            var blocklyArea = document.getElementById('blocklyArea');
+            var blocklyDiv = document.getElementById('blocklyDiv');
+            var onresize = function() {
+                // Compute the absolute coordinates and dimensions of blocklyArea.
+                var element = blocklyArea;
+                var x = 0;
+                var y = 0;
+                do {
+                    x += element.offsetLeft;
+                    y += element.offsetTop;
+                    element = element.offsetParent;
+                } while (element);
+                
+                // Position blocklyDiv over blocklyArea.
+                blocklyDiv.style.left = x + 'px';
+                blocklyDiv.style.top = y + 'px';
+                blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+                blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+                Blockly.svgResize(workspace);
+            };
+            window.addEventListener('resize', onresize, false);
+            onresize();
+            
+            // Add change listener for auto-save
+            workspace.addChangeListener(onBlocklyChange);
+        }
+        
+        // Load default blocks or saved blocks
+        function loadDefaultBlocks() {
+            // Try to restore saved blocks
+            var xml = localStorage.getItem('blocklyXML');
+            if (xml) {
+                try {
+                    var xmlDom = Blockly.Xml.textToDom(xml);
+                    Blockly.Xml.domToWorkspace(xmlDom, workspace);
+                    console.log('Loaded saved blocks');
+                    return;
+                } catch (e) {
+                    console.error('Error loading saved blocks', e);
+                }
+            }
+            
+            // If no saved blocks, create default Arduino setup/loop
+            var defaultXml = '<xml>' +
+                '<block type="arduino_setup" deletable="false" x="20" y="20"></block>' +
+                '<block type="arduino_loop" deletable="false" x="20" y="200"></block>' +
+                '</xml>';
+            var xmlDom = Blockly.Xml.textToDom(defaultXml);
+            Blockly.Xml.domToWorkspace(xmlDom, workspace);
+            console.log('Loaded default blocks');
+        }
+        
+        // Switch between tabs (blocks, arduino, xml)
+        function tabClick(clickedName) {
+            selected = clickedName;
+            renderContent();
+        }
+        
+        // Render content for the selected tab
+        function renderContent() {
+            if (selected === 'arduino') {
+                document.getElementById('content_arduino').value = Blockly.Arduino.workspaceToCode(workspace);
+            } else if (selected === 'xml') {
+                var xmlDom = Blockly.Xml.workspaceToDom(workspace);
+                var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+                document.getElementById('content_xml').value = xmlText;
+            }
+        }
+        
+        // Preview modal elements
+        var previewModal = document.getElementById('previewModal');
+        var codeContainer = document.getElementById('codeContainer');
+        var closePreviewBtn = document.getElementById('closePreview');
+        var modalTitle = document.getElementById('modalTitle');
+        
+        // Preview Code button event handler
+        document.getElementById('previewCodeButton').addEventListener('click', function() {
+            try {
+                // Switch to Arduino view internally
+                tabClick('arduino');
+                
+                // Generate Arduino code
+                var code = Blockly.Arduino.workspaceToCode(workspace);
+                
+                // Display code in the modal
+                modalTitle.textContent = "Arduino Code Preview";
+                codeContainer.textContent = code;
+                previewModal.style.display = 'block';
+                
+                // Send to Android
+                if (window.BlocklyBridge) {
+                    var xml = Blockly.Xml.workspaceToDom(workspace);
+                    var xmlText = Blockly.Xml.domToText(xml);
+                    window.BlocklyBridge.saveWorkspace(xmlText, code);
+                }
+            } catch (e) {
+                console.error("Error generating code:", e);
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.logMessage("Error: " + e.message);
+                }
+            }
+        });
+
+        // Preview XML button event handler
+        document.getElementById('previewXmlButton').addEventListener('click', function() {
+            try {
+                // Switch to XML view internally
+                tabClick('xml');
+                
+                // Get XML
+                var xmlDom = Blockly.Xml.workspaceToDom(workspace);
+                var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+                
+                // Display XML in the modal
+                modalTitle.textContent = "XML Preview";
+                codeContainer.textContent = xmlText;
+                previewModal.style.display = 'block';
+            } catch (e) {
+                console.error("Error generating XML:", e);
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.logMessage("Error: " + e.message);
+                }
+            }
+        });
+        
+        // Close preview modal
+        closePreviewBtn.addEventListener('click', function() {
+            previewModal.style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target == previewModal) {
+                previewModal.style.display = 'none';
+            }
+        });
+        
+        // Upload button - for Arduino upload
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            try {
+                // Generate code first
+                var code = Blockly.Arduino.workspaceToCode(workspace);
+                
+                // Get XML as well for recording the state
+                var xml = Blockly.Xml.workspaceToDom(workspace);
+                var xmlText = Blockly.Xml.domToText(xml);
+                
+                // Call bridge function if available
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.saveWorkspace(xmlText, code);
+                    // We're uploading, so we can call uploadCode on the bridge
+                    window.BlocklyBridge.uploadCode();
+                    window.BlocklyBridge.logMessage("Upload requested");
+                } else {
+                    console.log("Upload button clicked - but BlocklyBridge not available");
+                    alert("Code ready for upload:\n\n" + code);
+                }
+            } catch (e) {
+                console.error("Error during upload:", e);
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.logMessage("Error: " + e.message);
+                }
+            }
+        });
+        
+        // Save button - for project saving
+        document.getElementById('saveButton').addEventListener('click', function() {
+            try {
+                // Get the workspace XML dengan namespace yang benar
+                var xml = Blockly.Xml.workspaceToDom(workspace);
+                var xmlText = Blockly.Xml.domToText(xml);
+                
+                // Save locally
+                localStorage.setItem('blocklyXML', xmlText);
+                
+                // Generate Arduino code
+                var code = Blockly.Arduino.workspaceToCode(workspace);
+                
+                // Log XML untuk debugging
+                console.log("Saving XML:", xmlText);
+                
+                // Send to Android
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.saveWorkspace(xmlText, code);
+                    if (window.BlocklyBridge.showSaveDialog) {
+                        window.BlocklyBridge.showSaveDialog();
+                    }
+                    window.BlocklyBridge.logMessage("Save dialog requested");
+                } else {
+                    console.log("Saved locally - BlocklyBridge not available");
+                    alert("Project saved locally.");
+                }
+            } catch (e) {
+                console.error("Error saving:", e);
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.logMessage("Error: " + e.message);
+                }
+            }
+        });
+        
+        // Auto-save when blocks change (debounced)
+        var saveTimeout = null;
+        function onBlocklyChange(event) {
+            // Hanya auto-save saat blok berubah, bukan saat aplikasi dimulai
+            if (!event.isUiEvent && (event.type == Blockly.Events.BLOCK_CHANGE || 
+                event.type == Blockly.Events.BLOCK_CREATE || 
+                event.type == Blockly.Events.BLOCK_DELETE || 
+                event.type == Blockly.Events.BLOCK_MOVE)) {
+                
+                if (saveTimeout) {
+                    clearTimeout(saveTimeout);
+                }
+                
+                saveTimeout = setTimeout(function() {
+                    try {
+                        // Get the XML from the workspace
+                        var xml = Blockly.Xml.workspaceToDom(workspace);
+                        var xmlText = Blockly.Xml.domToText(xml);
+                        
+                        // Log XML untuk debugging
+                        console.log("Auto-saving XML:", xmlText.substring(0, 100) + "...");
+                        
+                        // Save locally
+                        localStorage.setItem('blocklyXML', xmlText);
+                        
+                        // Generate Arduino code
+                        var code = Blockly.Arduino.workspaceToCode(workspace);
+                        
+                        // Send to Android if bridge is available
+                        if (window.BlocklyBridge) {
+                            window.BlocklyBridge.saveWorkspace(xmlText, code);
+                        }
+                    } catch (e) {
+                        console.error("Error in auto-save:", e);
+                    }
+                }, 1000); // 1 second debounce
+            }
+        }
+        
+        // Function to load workspace from external source
+        function loadBlocksFromXml(xmlText) {
+            try {
+                if (workspace) {
+                    var xml = Blockly.Xml.textToDom(xmlText);
+                    workspace.clear();
+                    Blockly.Xml.domToWorkspace(xml, workspace);
+                    console.log('Workspace loaded from external XML');
+                    
+                    // Save locally as backup
+                    localStorage.setItem('blocklyXML', xmlText);
+                    
+                    if (window.BlocklyBridge) {
+                        window.BlocklyBridge.logMessage("Blocks loaded successfully");
+                        window.BlocklyBridge.notifyWorkspaceLoaded();
+                    }
+                } else {
+                    console.error('Workspace not initialized');
+                }
+            } catch (e) {
+                console.error("Error loading blocks:", e);
+                if (window.BlocklyBridge) {
+                    window.BlocklyBridge.logMessage("Error loading blocks: " + e.message);
+                }
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initBlockly);
+    </script>
+</body>
+</html> 

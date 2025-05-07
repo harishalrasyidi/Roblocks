@@ -77,6 +77,15 @@ dependencies {
     // WebView
     implementation("androidx.webkit:webkit:1.8.0")
 
+
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
+
+    implementation(libs.androidx.webkit.v1130) // Make sure you include the WebView dependency
+    implementation("androidx.compose.ui:ui:1.8.0") // Make sure you have the latest Compose version
+    implementation(libs.material3) // For Material 3
+    implementation("androidx.navigation:navigation-compose:2.5.0") // For navigation support
+
+
     // TensorFlow Lite
 
     implementation (libs.tensorflow.lite)

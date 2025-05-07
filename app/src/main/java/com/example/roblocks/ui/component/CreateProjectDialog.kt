@@ -13,7 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.roblocks.blockly.SaveProjectDialog
 import com.example.roblocks.data.entities.ProjectAIEntity
 import com.example.roblocks.data.entities.ProjectEntity
 import com.example.roblocks.data.entities.ProjectIOTEntity
@@ -30,8 +29,8 @@ fun InsertNamaProyek(
     projectType: String
 ) {
     val namaProyek = remember { mutableStateOf("") }
-    val projectIOTViewModel: ProjectIOTViewModel = hiltViewModel()
-    val roblocksViewModel: RoblocksViewModel = hiltViewModel()
+    val deskripsiProyek = remember { mutableStateOf("") }
+    val projectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
     AlertDialog(
         containerColor = Color(0xFFA199FF),
         onDismissRequest = onDismiss,
@@ -79,42 +78,54 @@ fun InsertNamaProyek(
                             ),
                             shape = RoundedCornerShape(8.dp),
                         )
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        Text(
+                            text = "Deskripsi Proyek",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color = Color.White,
+                                fontSize = 16.sp,
+                            ),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        TextField(
+                            value = deskripsiProyek.value,
+                            textStyle = MaterialTheme.typography.titleMedium.copy(
+                                color = Color.Black,
+                                fontSize = 16.sp,
+                            ),
+                            onValueChange = { deskripsiProyek.value = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Masukkan Deskripsi Proyek") },
+                            colors = TextFieldDefaults.colors(
+                                unfocusedContainerColor = Color.White,
+                                focusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Magenta,
+                                unfocusedIndicatorColor = Color.Magenta,
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                        )
                     }
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = {
-                onDismiss()
-
-                val newProject = if (projectType == "IOT") {
-                    ProjectIOTEntity(
-                        id = UUID.randomUUID().toString(),
-                        name = namaProyek.value,
-                        tipe = title,
-                        workspace_xml = "",
-                        file_block_code = "",
-                        file_source_code = "",
-                        created_at = System.currentTimeMillis(),
-                        updated_at = System.currentTimeMillis()
-                    )
-                } else {
-                    ProjectAIEntity(
-                        id = UUID.randomUUID().toString(),
-                        name = namaProyek.value,
-                        tipe = title,
-                        file_source_proyek_AI = "", // path to AI model
-                        created_at = System.currentTimeMillis(),
-                        updated_at = System.currentTimeMillis(),
-                        workspace_xml = "", // Blockly XML
-                        id_siswa = "current_user_id"
-                    )
+                if (namaProyek.value.isNotBlank()) {
+                    // Simpan proyek ke database
+                    projectIOTViewModel.saveProject(namaProyek.value, title)
+                    
+                    // Navigasi kembali ke halaman robotics_screen alih-alih ke editor blockly
+                    navController.navigate("robotics_screen") {
+                        // Hapus semua halaman sebelumnya dari back stack
+                        popUpTo("robotics_screen") { inclusive = true }
+                    }
+                    
+                    // Tutup dialog
+                    onDismiss()
                 }
-
-                roblocksViewModel.saveProject(newProject)
-                navController.navigate(route)
-
-
             }) {
                 Text(
                     "Buat Proyek",

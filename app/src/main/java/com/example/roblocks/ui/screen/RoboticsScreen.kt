@@ -15,8 +15,8 @@ import com.example.roblocks.R
 import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 import com.example.roblocks.ui.component.ArticleCard
 import com.example.roblocks.ui.BottomNavBar
-import com.example.roblocks.ui.component.ProjectCard
-import com.example.roblocks.ui.component.CardJenisProyek
+import com.example.roblocks.ui.component.ProjectCardModified
+import com.example.roblocks.ui.component.cardJenisProyek
 import androidx.compose.runtime.collectAsState
 
 @Composable
@@ -60,14 +60,17 @@ fun RoboticsScreen(navController: NavController) {
 
 
             //tambah kondisi jadi ada list project waktu DAO udah beres
-            ProjectCard("Project Robotics/IOT", false, "Robotics", navController, projectList)
+            ProjectCardModified("Project Robotics/IOT", false, "Robotics", navController, projectList)
 
             Spacer(modifier = Modifier.height(24.dp))
 
             ArticleCard(
                 icon = R.drawable.ic_buku,
                 title = "Learn",
-                description = "Pelajari Tentang Robotika dan Internet Of Things"
+                description = "Pelajari Tentang Robotika dan Internet Of Things",
+                onClick = {
+                    navController.navigate("learn_screen")
+                }
             )
         }
     }
@@ -76,6 +79,8 @@ fun RoboticsScreen(navController: NavController) {
 @Composable
 fun CreateProjectDialogRobotics(onDismiss: () -> Unit, navController: NavController) {
     val namaProyek = remember { mutableStateOf("") }
+    val deskripsiProyek = remember { mutableStateOf("") }
+    val projectIOTViewModel: ProjectIOTViewModel = hiltViewModel()
 
     AlertDialog(
         containerColor = Color(0xFF4A65FE),
@@ -110,9 +115,9 @@ fun CreateProjectDialogRobotics(onDismiss: () -> Unit, navController: NavControl
                         Spacer(modifier = Modifier.height(4.dp))
                         CardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController, "IOT")
                         Spacer(modifier = Modifier.height(6.dp))
-                        CardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController, "IOT")
+                        cardJenisProyek("ESP8266", R.drawable.ic_robot, "Buat Projek Untuk ESP8266 (Wi-Fi)", "blockly_editor_screen", navController)
                         Spacer(modifier = Modifier.height(6.dp))
-                        CardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController, "IOT")
+                        cardJenisProyek("ESP32", R.drawable.ic_robot, "Buat Projek Untuk ESP32 (Wi-Fi + BLE)", "blockly_editor_screen", navController)
                     }
                 }
             }
