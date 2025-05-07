@@ -19,8 +19,8 @@ data class ProjectAIEntity(
     override val name: String,
     override val tipe: String,
     val file_source_proyek_AI: String,
-    val created_at: Long,
-    val updated_at: Long,
+    override val created_at: Long,
+    override val updated_at: Long,
     val workspace_xml: String,
     val id_siswa: String
 ): ProjectEntity

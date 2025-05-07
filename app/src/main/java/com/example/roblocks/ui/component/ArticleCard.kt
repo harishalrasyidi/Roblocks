@@ -16,10 +16,12 @@ fun ArticleCard(
     icon: Int,
     title: String,
     description: String,
-){
+    onClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     Button(
-        onClick = {},
-        modifier = Modifier.height(100.dp).fillMaxWidth(),
+        onClick = onClick,
+        modifier = modifier.height(100.dp).fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC8412A)),
         shape = RoundedCornerShape(5.dp)
     ) {
@@ -46,7 +48,6 @@ fun ArticleCard(
                         color = Color.White
                     ),
                     modifier = Modifier.offset(x = 6.dp, y = -4.dp)
-
                 )
             }
             Spacer(modifier = Modifier.width(28.dp))
@@ -59,7 +60,6 @@ fun ArticleCard(
                     color = Color.White
                 ),
                 modifier = Modifier.weight(1f)
-
             )
         }
     }

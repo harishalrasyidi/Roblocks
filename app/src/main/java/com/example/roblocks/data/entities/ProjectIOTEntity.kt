@@ -21,6 +21,6 @@ data class ProjectIOTEntity(
     val file_block_code: String, // Link ke file XML blockly
     val file_source_code: String, // Link ke file Arduino .ino
     val workspace_xml: String,    // Langsung simpan XML workspace dalam database
-    val created_at: Long,
-    val updated_at: Long,
+    override val created_at: Long,
+    override val updated_at: Long,
 ): ProjectEntity

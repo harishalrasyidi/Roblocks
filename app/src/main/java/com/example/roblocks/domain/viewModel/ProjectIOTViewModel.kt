@@ -3,8 +3,12 @@ package com.example.roblocks.domain.viewModel
 import android.annotation.SuppressLint
 import android.app.Application
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.room.BuiltInTypeConverters
 import com.example.roblocks.data.entities.ProjectIOTEntity
 import com.example.roblocks.domain.repository.ProjectIOTRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -279,6 +283,13 @@ class ProjectIOTViewModel @Inject constructor(
                     toastMessage = "Gagal membuka proyek: ${e.message}"
                 )
             }
+        }
+    }
+    private val _project = mutableStateOf<ProjectIOTEntity?>(null)
+    fun loadProjectTest(id: String){
+        viewModelScope.launch {
+            val loadedProject = repository.getProjectById(id)
+            _project.value = loadedProject
         }
     }
     

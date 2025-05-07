@@ -49,6 +49,10 @@ class ProjectIOTRepositoryImpl @Inject constructor(
         return project
     }
 
+    override suspend fun insertProject(project: ProjectIOTEntity){
+        projectIOTDao.insertProject(project)
+    }
+
     override suspend fun updateProject(project: ProjectIOTEntity) {
         val updatedProject = project.copy(updated_at = System.currentTimeMillis())
         projectIOTDao.updateProject(updatedProject)

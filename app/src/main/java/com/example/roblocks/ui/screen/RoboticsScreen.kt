@@ -67,7 +67,10 @@ fun RoboticsScreen(navController: NavController) {
             ArticleCard(
                 icon = R.drawable.ic_buku,
                 title = "Learn",
-                description = "Pelajari Tentang Robotika dan Internet Of Things"
+                description = "Pelajari Tentang Robotika dan Internet Of Things",
+                onClick = {
+                    navController.navigate("learn_screen")
+                }
             )
         }
     }
@@ -110,7 +113,7 @@ fun CreateProjectDialogRobotics(onDismiss: () -> Unit, navController: NavControl
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        cardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController)
+                        CardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController, "IOT")
                         Spacer(modifier = Modifier.height(6.dp))
                         cardJenisProyek("ESP8266", R.drawable.ic_robot, "Buat Projek Untuk ESP8266 (Wi-Fi)", "blockly_editor_screen", navController)
                         Spacer(modifier = Modifier.height(6.dp))

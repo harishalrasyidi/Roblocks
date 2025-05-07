@@ -1,6 +1,5 @@
 package com.example.roblocks.ai
 
-
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
@@ -16,11 +15,25 @@ class ImageUploader {
 
     suspend fun uploadImages(
         context: Context,
-        class1Images: List<Bitmap>,
-        class2Images: List<Bitmap>
+        images: List<Bitmap>,
+        classLabels: List<String>,
+        imagesPerClass: List<Int>
     ): Boolean = withContext(Dispatchers.IO) {
+        if (images.isEmpty() || classLabels.isEmpty() || imagesPerClass.isEmpty()) {
+            Log.e("Uploader", "Empty input: images=${images.size}, labels=${classLabels.size}, imagesPerClass=${imagesPerClass.size}")
+            return@withContext false
+        }
+        if (classLabels.size != imagesPerClass.size) {
+            Log.e("Uploader", "Mismatch: labels=${classLabels.size}, imagesPerClass=${imagesPerClass.size}")
+            return@withContext false
+        }
+        if (imagesPerClass.sum() != images.size) {
+            Log.e("Uploader", "Total images (${images.size}) does not match sum of imagesPerClass (${imagesPerClass.sum()})")
+            return@withContext false
+        }
+
         try {
-            val url = URL("http://192.168.1.11:5000/train") // Ganti IP sesuai backend kamu
+            val url = URL("http://192.168.1.11:5000/train") // Ganti IP sesuai backend
             val boundary = UUID.randomUUID().toString()
             val lineEnd = "\r\n"
             val twoHyphens = "--"
@@ -35,16 +48,16 @@ class ImageUploader {
 
             val outputStream = DataOutputStream(connection.outputStream)
 
-            // Upload Class 1 Images
-            class1Images.forEachIndexed { index, bitmap ->
-                val file = createTempFile(context, bitmap, "class1_img_$index.jpg")
-                writeFilePart(outputStream, file, "class1", boundary)
-            }
-
-            // Upload Class 2 Images
-            class2Images.forEachIndexed { index, bitmap ->
-                val file = createTempFile(context, bitmap, "class2_img_$index.jpg")
-                writeFilePart(outputStream, file, "class2", boundary)
+            // Upload images with their corresponding class labels
+            var imageIndex = 0
+            classLabels.forEachIndexed { classIndex, label ->
+                val numImages = imagesPerClass[classIndex]
+                for (i in 0 until numImages) {
+                    val bitmap = images[imageIndex]
+                    val file = createTempFile(context, bitmap, "${label}_img_$i.jpg")
+                    writeFilePart(outputStream, file, "images", label, boundary)
+                    imageIndex++
+                }
             }
 
             outputStream.writeBytes("$twoHyphens$boundary$twoHyphens$lineEnd")
@@ -76,6 +89,7 @@ class ImageUploader {
         outputStream: DataOutputStream,
         file: File,
         fieldName: String,
+        classLabel: String,
         boundary: String
     ) {
         val twoHyphens = "--"
@@ -85,6 +99,7 @@ class ImageUploader {
         outputStream.writeBytes("$twoHyphens$boundary$lineEnd")
         outputStream.writeBytes("Content-Disposition: form-data; name=\"$fieldName\"; filename=\"${URLEncoder.encode(file.name, "UTF-8")}\"$lineEnd")
         outputStream.writeBytes("Content-Type: $mimeType$lineEnd")
+        outputStream.writeBytes("Content-Class-Label: $classLabel$lineEnd")
         outputStream.writeBytes(lineEnd)
 
         val fileInputStream = FileInputStream(file)

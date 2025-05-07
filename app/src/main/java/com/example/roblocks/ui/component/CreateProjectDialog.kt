@@ -13,16 +13,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.roblocks.data.entities.ProjectAIEntity
+import com.example.roblocks.data.entities.ProjectEntity
 import com.example.roblocks.data.entities.ProjectIOTEntity
 import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
+import com.example.roblocks.domain.viewModel.RoblocksViewModel
+import java.util.UUID
 
 @Composable
-fun insertNamaProyek(
+fun InsertNamaProyek(
     title: String,
     route: String,
     onDismiss: () -> Unit,
-    navController: NavController
-){
+    navController: NavController,
+    projectType: String
+) {
     val namaProyek = remember { mutableStateOf("") }
     val deskripsiProyek = remember { mutableStateOf("") }
     val projectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
@@ -145,13 +150,15 @@ fun insertNamaProyek(
     )
 }
 
+
 @Composable
-fun cardJenisProyek(
+fun CardJenisProyek(
     title: String,
     icon: Int,
     description: String,
     route: String,
-    navController: NavController
+    navController: NavController,
+    projectType: String
 ) {
     var inputNamaProyek by remember { mutableStateOf(false) }
 
@@ -254,8 +261,8 @@ fun cardJenisProyek(
                         )
 
                     }
-                if(inputNamaProyek == true){
-                    insertNamaProyek(title, route, onDismiss = {inputNamaProyek = false}, navController)
+                if(inputNamaProyek){
+                    InsertNamaProyek(title, route, onDismiss = {inputNamaProyek = false}, navController, projectType)
                 }
             }
         }
