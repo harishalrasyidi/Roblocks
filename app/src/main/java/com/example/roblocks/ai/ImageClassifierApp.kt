@@ -38,6 +38,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.roblocks.ui.BottomNavBar
@@ -48,6 +49,10 @@ import kotlinx.coroutines.flow.update
 import kotlin.math.min
 import com.example.roblocks.R
 import com.example.roblocks.domain.viewModel.ClassifierViewModel
+import com.example.roblocks.domain.viewModel.ProjectAIViewModel
+import com.example.roblocks.domain.viewModel.RoblocksViewModel
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.withIndex
 import java.io.File
 
 // Data class to represent a class
@@ -65,7 +70,6 @@ fun FlexibleClassUI(
     val context = LocalContext.current
     val classes by imageClasses.collectAsState()
 
-    // Create a temporary file for the camera output
     val outputDirectory = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     val photoFile = remember {
         File.createTempFile("photo_${System.currentTimeMillis()}", ".jpg", outputDirectory).apply {
@@ -218,6 +222,7 @@ fun FlexibleClassUI(
 @Composable
 fun TrainingSection(viewModel: ClassifierViewModel, context: Context) {
     val uiState by viewModel.uiState.collectAsState()
+
     Card(
         colors = CardDefaults.cardColors(containerColor = (Color(0xFF4A65FE))),
         modifier = Modifier
@@ -435,12 +440,14 @@ fun TestSection(viewModel: ClassifierViewModel, context: Context, onClassifyImag
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ImageClassifierApp(navController: NavController) {
+fun ImageClassifierApp(navController: NavController, projectID: String? = null) {
     val context = LocalContext.current
     val viewModel: ClassifierViewModel = hiltViewModel()
+    val aiViewModel: ProjectAIViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
     val imageClasses by viewModel.imageClasses.collectAsState()
     val scrollState = rememberScrollState()
+    val uiStateAI by aiViewModel.uiState.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -466,6 +473,12 @@ fun ImageClassifierApp(navController: NavController) {
     ) { isGranted ->
         if (!isGranted) {
             viewModel.setTrainingError("Storage permission required")
+        }
+    }
+
+    LaunchedEffect(projectID) {
+        if (projectID != null) {
+            aiViewModel.loadProject(projectID)
         }
     }
 
@@ -537,26 +550,11 @@ fun ImageClassifierApp(navController: NavController) {
     }
 
     val selectedIndex = remember { mutableStateOf(1) }
-
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nama Proyek") },
+                title = { Text(uiStateAI.projectName) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        },
-        bottomBar = {
-            BottomNavBar(
-                selectedIndex = selectedIndex.value,
-                onItemSelected = { index ->
-                    when (index) {
-                        0 -> navController.navigate("main_screen")
-                        1 -> {}
-                        2 -> navController.navigate("robotics_screen")
-                        3 -> navController.navigate("learn_screen")
-                        4 -> navController.navigate("profile_screen")
-                    }
-                }
             )
         },
         containerColor = Color(0xFFF9F9FF)

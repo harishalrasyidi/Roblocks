@@ -14,9 +14,12 @@ import kotlinx.coroutines.flow.Flow
 interface ProjectAIDao {
     @Query("SELECT * FROM ProyekAI_table ORDER BY updated_at DESC")
     fun getAllProjectsNewest(): Flow<List<ProjectAIEntity>>
-    
+
+    @Query("SELECT * FROM ProyekAI_table  ORDER BY updated_at DESC LIMIT 1")
+    fun getProjectNewest(): ProjectAIEntity
+
     @Query("SELECT * FROM ProyekAI_table WHERE id = :id")
-    suspend fun getProjectById(id: String): ProjectAIEntity?
+    fun getProjectById(id: String): ProjectAIEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProject(project: ProjectAIEntity)

@@ -16,8 +16,9 @@ import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 import com.example.roblocks.ui.component.ArticleCard
 import com.example.roblocks.ui.BottomNavBar
 import com.example.roblocks.ui.component.ProjectCardModified
-import com.example.roblocks.ui.component.cardJenisProyek
+import com.example.roblocks.ui.component.CardJenisProyek
 import androidx.compose.runtime.collectAsState
+import com.example.roblocks.ui.component.ProjectCard
 
 @Composable
 fun RoboticsScreen(navController: NavController) {
@@ -60,7 +61,7 @@ fun RoboticsScreen(navController: NavController) {
 
 
             //tambah kondisi jadi ada list project waktu DAO udah beres
-            ProjectCardModified("Project Robotics/IOT", false, "Robotics", navController, projectList)
+            ProjectCard("Project Robotics/IOT", false, "IOT", navController, projectList)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -115,9 +116,9 @@ fun CreateProjectDialogRobotics(onDismiss: () -> Unit, navController: NavControl
                         Spacer(modifier = Modifier.height(4.dp))
                         CardJenisProyek("Arduino Uno", R.drawable.ic_robot, "Buat Projek Untuk Arduino Uno", "blockly_editor_screen", navController, "IOT")
                         Spacer(modifier = Modifier.height(6.dp))
-                        cardJenisProyek("ESP8266", R.drawable.ic_robot, "Buat Projek Untuk ESP8266 (Wi-Fi)", "blockly_editor_screen", navController)
+                        CardJenisProyek("ESP8266", R.drawable.ic_robot, "Buat Projek Untuk ESP8266 (Wi-Fi)", "blockly_editor_screen", navController, "IOT")
                         Spacer(modifier = Modifier.height(6.dp))
-                        cardJenisProyek("ESP32", R.drawable.ic_robot, "Buat Projek Untuk ESP32 (Wi-Fi + BLE)", "blockly_editor_screen", navController)
+                        CardJenisProyek("ESP32", R.drawable.ic_robot, "Buat Projek Untuk ESP32 (Wi-Fi + BLE)", "blockly_editor_screen", navController, "IOT")
                     }
                 }
             }

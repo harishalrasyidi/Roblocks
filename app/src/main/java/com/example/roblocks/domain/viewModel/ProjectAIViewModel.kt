@@ -2,6 +2,7 @@ package com.example.roblocks.domain.viewModel
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
@@ -35,12 +36,9 @@ class ProjectAIViewModel @Inject constructor(
 
     @SuppressLint("StaticFieldLeak")
     private val context = getApplication<Application>().applicationContext
-    private val _uiState = MutableStateFlow(BlocklyUiState())
-    val uiState: StateFlow<BlocklyUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(ProjectAIUiState())
+    val uiState: StateFlow<ProjectAIUiState> = _uiState.asStateFlow()
 
-    // Current workspace and generated code
-    private var currentWorkspaceXml: String? = null
-    private var currentGeneratedCode: String? = null
 
     fun saveAIProject(
         project: ProjectAIEntity,
@@ -59,6 +57,46 @@ class ProjectAIViewModel @Inject constructor(
         }
     }
 
+    fun loadProject(projectId: String) {
+        viewModelScope.launch {
+            try {
+                val project = repository.getProjectById(projectId)
+                if (project != null) {
+                    try{
+                        _uiState.value = _uiState.value.copy(
+                            currentProjectId = projectId,
+                            projectName = project.name,
+                            projectTipe = project.tipe,
+                        )
+
+                        _uiState.value = _uiState.value.copy(
+                            showToast = true,
+                            toastMessage = "Proyek berhasil dibuka",
+                            shouldLoadWorkspace = true
+                        )
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error ", e)
+                        _uiState.value = _uiState.value.copy(
+                            showToast = true,
+                            toastMessage = "Gagal membuka project AI: ${e.message}"
+                        )
+                    }
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        showToast = true,
+                        toastMessage = "Proyek tidak ditemukan"
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading project", e)
+                _uiState.value = _uiState.value.copy(
+                    showToast = true,
+                    toastMessage = "Gagal membuka proyek: ${e.message}"
+                )
+            }
+        }
+    }
+
     fun showSaveDialog() {
         _uiState.value = _uiState.value.copy(
             showSaveDialog = true
@@ -71,21 +109,6 @@ class ProjectAIViewModel @Inject constructor(
             projectName = "",
             projectTipe = ""
         )
-    }
-
-    // Show/hide code preview
-    fun showCodePreview() {
-        if (currentGeneratedCode != null) {
-            _uiState.value = _uiState.value.copy(
-                showCodePreview = true,
-                generatedCode = currentGeneratedCode ?: "// Tidak ada kode yang dihasilkan"
-            )
-        } else {
-            _uiState.value = _uiState.value.copy(
-                showToast = true,
-                toastMessage = "Tidak ada kode yang tersedia untuk ditampilkan"
-            )
-        }
     }
 
     fun hideCodePreview() {
@@ -112,4 +135,16 @@ class ProjectAIViewModel @Inject constructor(
         return (repository.getAllProjects())
     }
 }
+
+data class ProjectAIUiState(
+    val showSaveDialog: Boolean = false,
+    val projectName: String = "",
+    val projectTipe: String = "",
+    val showToast: Boolean = false,
+    val toastMessage: String = "",
+    val showCodePreview: Boolean = false,
+    val generatedCode: String = "",
+    val currentProjectId: String? = null,
+    val shouldLoadWorkspace: Boolean = false
+)
 

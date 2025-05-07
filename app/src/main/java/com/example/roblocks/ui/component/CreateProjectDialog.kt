@@ -16,6 +16,7 @@ import androidx.navigation.NavController
 import com.example.roblocks.data.entities.ProjectAIEntity
 import com.example.roblocks.data.entities.ProjectEntity
 import com.example.roblocks.data.entities.ProjectIOTEntity
+import com.example.roblocks.domain.viewModel.ProjectAIViewModel
 import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
 import com.example.roblocks.domain.viewModel.RoblocksViewModel
 import java.util.UUID
@@ -31,6 +32,10 @@ fun InsertNamaProyek(
     val namaProyek = remember { mutableStateOf("") }
     val deskripsiProyek = remember { mutableStateOf("") }
     val projectIOTViewModel : ProjectIOTViewModel = hiltViewModel()
+    val projectAIViewModel : ProjectAIViewModel = hiltViewModel()
+
+    val roblocksViewModel : RoblocksViewModel = hiltViewModel()
+
     AlertDialog(
         containerColor = Color(0xFFA199FF),
         onDismissRequest = onDismiss,
@@ -113,18 +118,28 @@ fun InsertNamaProyek(
         },
         confirmButton = {
             TextButton(onClick = {
-                if (namaProyek.value.isNotBlank()) {
-                    // Simpan proyek ke database
-                    projectIOTViewModel.saveProject(namaProyek.value, title)
-                    
-                    // Navigasi kembali ke halaman robotics_screen alih-alih ke editor blockly
-                    navController.navigate("robotics_screen") {
-                        // Hapus semua halaman sebelumnya dari back stack
-                        popUpTo("robotics_screen") { inclusive = true }
+                if(projectType == "IOT") {
+                    if (namaProyek.value.isNotBlank()) {
+                        projectIOTViewModel.saveProject(namaProyek.value, title)
+                        onDismiss()
                     }
-                    
-                    // Tutup dialog
-                    onDismiss()
+                }
+                else{
+                    if (namaProyek.value.isNotBlank()) {
+                        val newProjectAI = ProjectAIEntity(
+                            id = UUID.randomUUID().toString(),
+                            name = namaProyek.value,
+                            tipe = title,
+                            file_source_proyek_AI = "", // path to AI model
+                            created_at = System.currentTimeMillis(),
+                            updated_at = System.currentTimeMillis(),
+                            workspace_xml = "", // Blockly XML
+                            id_siswa = "current_user_id"
+                        )
+                        roblocksViewModel.saveProject(newProjectAI)
+                        navController.navigate("ml_image")
+                        onDismiss()
+                    }
                 }
             }) {
                 Text(

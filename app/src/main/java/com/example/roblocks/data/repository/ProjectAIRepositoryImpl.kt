@@ -24,6 +24,10 @@ class ProjectAIRepositoryImpl @Inject constructor(
     @ApplicationContext private val projectAIDao: ProjectAIDao
 ) : ProjectAIRepository {
 
+    override fun getProjectNewest(): ProjectAIEntity{
+        return projectAIDao.getProjectNewest()
+    }
+
     override fun getAllProjects(): Flow<List<ProjectAIEntity>> {
         return projectAIDao.getAllProjectsNewest()
     }
