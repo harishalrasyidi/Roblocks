@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.Alignment
@@ -22,10 +21,8 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 
-
 @Composable
 fun YoutubePlayer(videoUrl: String) {
-    // Extract video ID from URL (works with multiple URL formats)
     val videoId = remember(videoUrl) {
         when {
             videoUrl.contains("youtube.com/watch?v=") -> {
@@ -37,7 +34,7 @@ fun YoutubePlayer(videoUrl: String) {
             videoUrl.contains("embed/") -> {
                 videoUrl.substringAfter("embed/").substringBefore("?")
             }
-            else -> videoUrl // Assume it's already a video ID
+            else -> videoUrl
         }
     }
 
@@ -71,6 +68,7 @@ fun ModuleDetailScreen(
     viewModel: ModuleQuizViewModel = viewModel()
 ) {
     val module by viewModel.getModuleById(moduleId).collectAsState(initial = null)
+    var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -96,10 +94,10 @@ fun ModuleDetailScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(horizontal = 16.dp, vertical = 8.dp) // Reduced vertical padding since we have the top bar
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 item {
-                    // Header Kapsul
+                    // Header
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -120,7 +118,7 @@ fun ModuleDetailScreen(
                         }
                     }
 
-                    // Deskripsi dengan jarak dan line spacing
+                    // Deskripsi
                     Text(
                         text = module!!.description,
                         style = MaterialTheme.typography.bodyMedium.copy(
@@ -137,7 +135,7 @@ fun ModuleDetailScreen(
                     // Tombol Mulai Quiz
                     Button(
                         onClick = {
-                            navController.navigate("quiz_screen/${moduleId}")
+                            showDialog = true
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -158,5 +156,31 @@ fun ModuleDetailScreen(
                 CircularProgressIndicator()
             }
         }
+    }
+
+    // AlertDialog konfirmasi
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Konfirmasi") },
+            text = { Text("Ingin mulai quiz?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        navController.navigate("quiz_screen/${moduleId}")
+                    }
+                ) {
+                    Text("Ya")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDialog = false }
+                ) {
+                    Text("Tidak")
+                }
+            }
+        )
     }
 }
