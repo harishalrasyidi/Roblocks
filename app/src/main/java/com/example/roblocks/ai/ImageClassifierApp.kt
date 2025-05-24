@@ -54,10 +54,8 @@ import com.example.roblocks.domain.viewModel.RoblocksViewModel
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.withIndex
 import java.io.File
-
-// Data class to represent a class
-data class ImageClass(val name: String, var imageCount: Int = 0, var images: List<Bitmap> = emptyList())
-
+import com.example.roblocks.ai.ImageClass
+import com.example.roblocks.ai.TrainingSection
 
 @Composable
 fun FlexibleClassUI(
@@ -219,107 +217,109 @@ fun FlexibleClassUI(
     }
 }
 
-@Composable
-fun TrainingSection(viewModel: ClassifierViewModel, context: Context) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    Card(
-        colors = CardDefaults.cardColors(containerColor = (Color(0xFF4A65FE))),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally)) {
-            Row(verticalAlignment = Alignment.CenterVertically){
-                Text(
-                    text = "Melatih Model",
-                    fontSize = 25.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-
-                Spacer(Modifier.width(50.dp))
-
-                Image(
-                    painter = painterResource(R.drawable.train_model_illustration),
-                    contentDescription = "Train Model",
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-            Spacer(Modifier.height(20.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-//                    Text("Latian Lagi", fontSize = 14.sp)
-                    Button(
-                        onClick = { viewModel.trainModel(context) },
-                        enabled = !uiState.isTraining && hasEnoughTrainingData(viewModel.imageClasses),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFECD46), contentColor = Color.White),
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    ) {
-                        Text(if (uiState.modelTrained) "Model Trained" else "Train Model")
-                    }
-                }
-                Column {
-                    Text("Advanced", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Epochs: ${uiState.epochs}", color = Color.White)
-                        Slider(
-                            value = uiState.epochs.toFloat(),
-                            onValueChange = { /* Implement update logic */ },
-                            valueRange = 1f..100f,
-                            steps = 99
-                        )
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Batch-Size: ${uiState.batchSize}", color = Color.White)
-                        Slider(
-                            value = uiState.batchSize.toFloat(),
-                            onValueChange = { /* Implement update logic */ },
-                            valueRange = 1f..64f,
-                            steps = 63
-                        )
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Learning-Rate: ${"%.3f".format(uiState.learningRate)}", color = Color.White)
-                        Slider(
-                            value = uiState.learningRate,
-                            onValueChange = { /* Implement update logic */ },
-                            valueRange = 0.001f..0.1f,
-                            steps = 99
-                        )
-                    }
-                }
-            }
-            if (uiState.isTraining) {
-                Spacer(modifier = Modifier.height(16.dp))
-                CircularProgressIndicator()
-                uiState.trainingMessage?.let { Text(it) }
-            }
-            uiState.trainingError?.let { error ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = error, color = MaterialTheme.colorScheme.error)
-            }
-            if (uiState.modelTrained) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Model Trained Successfully", color = Color.Green)
-                // Placeholder for Epochs vs Accuracy graph
-                Box(modifier = Modifier
-                    .size(200.dp)
-                    .background(Color.LightGray)) {
-                    Text("Epochs vs Accuracy Graph", color = Color.Black, modifier = Modifier.align(Alignment.Center))
-                }
-            }
-        }
-    }
-}
+//@Composable
+//fun TrainingSection(viewModel: ClassifierViewModel, context: Context) {
+//    val uiState by viewModel.uiState.collectAsState()
+//
+//    Card(
+//        colors = CardDefaults.cardColors(containerColor = Color(0xFF4A65FE)),
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(8.dp),
+//        elevation = CardDefaults.cardElevation(4.dp)
+//    ) {
+//        Column(modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally)) {
+//            Row(verticalAlignment = Alignment.CenterVertically) {
+//                Text(
+//                    text = "Melatih Model",
+//                    fontSize = 25.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    color = Color.White
+//                )
+//                Spacer(Modifier.width(50.dp))
+//                Image(
+//                    painter = painterResource(R.drawable.train_model_illustration),
+//                    contentDescription = "Train Model",
+//                    modifier = Modifier.size(30.dp)
+//                )
+//            }
+//            Spacer(Modifier.height(20.dp))
+//            Column(
+//                modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+//                verticalArrangement = Arrangement.SpaceBetween
+//            ) {
+//                Column(
+//                    modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+//                    verticalArrangement = Arrangement.SpaceBetween
+//                ) {
+//                    Button(
+//                        onClick = { viewModel.trainModel(context) },
+//                        enabled = !uiState.isTraining && hasEnoughTrainingData(viewModel.imageClasses),
+//                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFECD46), contentColor = Color.White),
+//                        modifier = Modifier.align(Alignment.CenterHorizontally)
+//                    ) {
+//                        Text(if (uiState.modelTrained) "Model Trained" else "Train Model")
+//                    }
+//                }
+//                Column {
+//                    Text("Advanced", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+//                    Row(verticalAlignment = Alignment.CenterVertically) {
+//                        Text("Epochs: ${uiState.epochs}", color = Color.White)
+//                        Slider(
+//                            value = uiState.epochs.toFloat(),
+//                            onValueChange = { viewModel.updateEpochs(it.toInt()) },
+//                            valueRange = 1f..100f,
+//                            steps = 99
+//                        )
+//                    }
+//                    Row(verticalAlignment = Alignment.CenterVertically) {
+//                        Text("Batch-Size: ${uiState.batchSize}", color = Color.White)
+//                        Slider(
+//                            value = uiState.batchSize.toFloat(),
+//                            onValueChange = { viewModel.updateBatchSize(it.toInt()) },
+//                            valueRange = 1f..64f,
+//                            steps = 63
+//                        )
+//                    }
+//                    Row(verticalAlignment = Alignment.CenterVertically) {
+//                        Text("Learning-Rate: ${"%.3f".format(uiState.learningRate)}", color = Color.White)
+//                        Slider(
+//                            value = uiState.learningRate,
+//                            onValueChange = { viewModel.updateLearningRate(it) },
+//                            valueRange = 0.001f..0.1f,
+//                            steps = 99
+//                        )
+//                    }
+//                }
+//            }
+//            if (uiState.isTraining) {
+//                Spacer(modifier = Modifier.height(16.dp))
+//                CircularProgressIndicator()
+//                uiState.trainingMessage?.let { Text(it) }
+//            }
+//            uiState.trainingError?.let { error ->
+//                Spacer(modifier = Modifier.height(8.dp))
+//                Text(text = error, color = MaterialTheme.colorScheme.error)
+//            }
+//            if (uiState.modelTrained) {
+//                Spacer(modifier = Modifier.height(16.dp))
+//                Text("Model Trained Successfully", color = Color.Green)
+//                // Placeholder for Epochs vs Accuracy graph
+//                Box(
+//                    modifier = Modifier
+//                        .size(200.dp)
+//                        .background(Color.LightGray)
+//                ) {
+//                    Text(
+//                        "Epochs vs Accuracy Graph",
+//                        color = Color.Black,
+//                        modifier = Modifier.align(Alignment.Center)
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
 
 @Composable
 fun TestSection(viewModel: ClassifierViewModel, context: Context, onClassifyImage: (Bitmap) -> Unit) {
@@ -340,7 +340,6 @@ fun TestSection(viewModel: ClassifierViewModel, context: Context, onClassifyImag
         )
     }
 
-    // Launcher for camera
     val takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
@@ -353,7 +352,6 @@ fun TestSection(viewModel: ClassifierViewModel, context: Context, onClassifyImag
         }
     )
 
-    // Launcher for storage picker
     val getImagePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -450,29 +448,11 @@ fun ImageClassifierApp(navController: NavController, projectID: String? = null) 
     val uiStateAI by aiViewModel.uiState.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (!isGranted) {
-            viewModel.setTrainingError("Storage permission required")
-        }
-    }
-
-    val manageStorageLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else false
-        if (!hasPermission) {
-            viewModel.setTrainingError("Storage permission required")
-        }
-    }
-
-    val requestPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (!isGranted) {
-            viewModel.setTrainingError("Storage permission required")
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.all { it.value }
+        if (!allGranted) {
+            viewModel.setTrainingError("Camera and storage permissions required")
         }
     }
 
@@ -483,60 +463,46 @@ fun ImageClassifierApp(navController: NavController, projectID: String? = null) 
     }
 
     LaunchedEffect(Unit) {
-        if (!viewModel.hasStoragePermissions(context)) {
-            viewModel.requestStoragePermission(context)
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_MEDIA_IMAGES
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        }
+        if (permissions.any {
+                ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+            }) {
+            permissionLauncher.launch(permissions)
         }
     }
 
     if (uiState.showPermissionDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissPermissionDialog() },
-            title = { Text("Storage Permission Needed") },
-            text = { Text("This app needs access to manage storage to save and load models") },
+            title = { Text("Permissions Needed") },
+            text = { Text("This app needs camera and storage access to capture and load images.") },
             confirmButton = {
                 Button(onClick = {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        try {
-                            val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-                            manageStorageLauncher.launch(intent)
-                        } catch (e: Exception) {
-                            val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION).apply {
-                                data = Uri.parse("package:${context.packageName}")
-                            }
-                            manageStorageLauncher.launch(intent)
-                        }
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.parse("package:${context.packageName}")
                     }
+                    context.startActivity(intent)
                     viewModel.dismissPermissionDialog()
                 }) {
                     Text("Open Settings")
                 }
             },
             dismissButton = {
-                Button(onClick = {
-                    viewModel.dismissPermissionDialog()
-                    viewModel.setTrainingError("Storage permission required")
-                }) {
+                Button(onClick = { viewModel.dismissPermissionDialog() }) {
                     Text("Cancel")
                 }
             }
         )
-    }
-
-    if (uiState.shouldRequestStoragePermission) {
-        LaunchedEffect(Unit) {
-            requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            viewModel.resetPermissionRequest()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
     }
 
     val testImagePicker = rememberLauncherForActivityResult(
@@ -549,7 +515,6 @@ fun ImageClassifierApp(navController: NavController, projectID: String? = null) 
         }
     }
 
-    val selectedIndex = remember { mutableStateOf(1) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -578,9 +543,7 @@ fun ImageClassifierApp(navController: NavController, projectID: String? = null) 
                     color = Color.White
                 )
             }
-
             Spacer(Modifier.height(20.dp))
-
             FlexibleClassUI(
                 imageClasses = viewModel.imageClasses,
                 selectedClass = uiState.selectedClass,
@@ -602,7 +565,7 @@ fun ImageClassifierApp(navController: NavController, projectID: String? = null) 
                     viewModel.classifyImage(bitmap, context)
                 }
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
         }
     }
 }

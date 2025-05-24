@@ -3,115 +3,89 @@ package com.example.roblocks.ai
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import com.example.roblocks.data.remote.BackendApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.*
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
-import java.util.*
+import javax.inject.Inject
 
-class ImageUploader {
-
+class ImageUploader @Inject constructor(
+    private val context: Context,
+    private val apiService: BackendApiService
+) {
     suspend fun uploadImages(
-        context: Context,
         images: List<Bitmap>,
         classLabels: List<String>,
-        imagesPerClass: List<Int>
-    ): Boolean = withContext(Dispatchers.IO) {
+        imagesPerClass: List<Int>,
+        epochs: Int,
+        batchSize: Int,
+        learningRate: Float
+    ): Map<String, Any>? = withContext(Dispatchers.IO) {
         if (images.isEmpty() || classLabels.isEmpty() || imagesPerClass.isEmpty()) {
             Log.e("Uploader", "Empty input: images=${images.size}, labels=${classLabels.size}, imagesPerClass=${imagesPerClass.size}")
-            return@withContext false
+            return@withContext null
         }
         if (classLabels.size != imagesPerClass.size) {
             Log.e("Uploader", "Mismatch: labels=${classLabels.size}, imagesPerClass=${imagesPerClass.size}")
-            return@withContext false
+            return@withContext null
         }
         if (imagesPerClass.sum() != images.size) {
             Log.e("Uploader", "Total images (${images.size}) does not match sum of imagesPerClass (${imagesPerClass.sum()})")
-            return@withContext false
+            return@withContext null
         }
-
         try {
-            val url = URL("http://192.168.1.11:5000/train") // Ganti IP sesuai backend
-            val boundary = UUID.randomUUID().toString()
-            val lineEnd = "\r\n"
-            val twoHyphens = "--"
-
-            val connection = url.openConnection() as HttpURLConnection
-            connection.doInput = true
-            connection.doOutput = true
-            connection.useCaches = false
-            connection.requestMethod = "POST"
-            connection.setRequestProperty("Connection", "Keep-Alive")
-            connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=$boundary")
-
-            val outputStream = DataOutputStream(connection.outputStream)
-
-            // Upload images with their corresponding class labels
+            val imageParts = mutableListOf<MultipartBody.Part>()
             var imageIndex = 0
             classLabels.forEachIndexed { classIndex, label ->
                 val numImages = imagesPerClass[classIndex]
                 for (i in 0 until numImages) {
                     val bitmap = images[imageIndex]
-                    val file = createTempFile(context, bitmap, "${label}_img_$i.jpg")
-                    writeFilePart(outputStream, file, "images", label, boundary)
+                    val file = createTempFile(bitmap, "${label}_img_$i.jpg")
+                    val requestBody = file.readBytes().toRequestBody("image/jpeg".toMediaType())
+                    val part = MultipartBody.Part.createFormData(
+                        "images",
+                        file.name,
+                        requestBody
+                    )
+                    imageParts.add(part)
                     imageIndex++
                 }
             }
-
-            outputStream.writeBytes("$twoHyphens$boundary$twoHyphens$lineEnd")
-            outputStream.flush()
-            outputStream.close()
-
-            val responseCode = connection.responseCode
-            val result = connection.inputStream.bufferedReader().use { it.readText() }
-
-            Log.d("Uploader", "Response code: $responseCode, result: $result")
-            responseCode == HttpURLConnection.HTTP_OK
-
+            val response = apiService.uploadImages(imageParts, classLabels, epochs, batchSize, learningRate)
+            Log.d("Uploader", "Upload response: $response")
+            response
         } catch (e: Exception) {
             Log.e("Uploader", "Upload failed", e)
-            false
+            null
         }
     }
 
-    private fun createTempFile(context: Context, bitmap: Bitmap, fileName: String): File {
+    suspend fun downloadModel(): File? = withContext(Dispatchers.IO) {
+        try {
+            val responseBody = apiService.downloadModel()
+            val modelFile = File(context.filesDir, "model.tflite")
+            responseBody.byteStream().use { input ->
+                FileOutputStream(modelFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            Log.d("Uploader", "Model downloaded to ${modelFile.absolutePath}")
+            modelFile
+        } catch (e: Exception) {
+            Log.e("Uploader", "Download failed", e)
+            null
+        }
+    }
+
+    private fun createTempFile(bitmap: Bitmap, fileName: String): File {
         val file = File(context.cacheDir, fileName)
         val out = FileOutputStream(file)
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
         out.flush()
         out.close()
         return file
-    }
-
-    private fun writeFilePart(
-        outputStream: DataOutputStream,
-        file: File,
-        fieldName: String,
-        classLabel: String,
-        boundary: String
-    ) {
-        val twoHyphens = "--"
-        val lineEnd = "\r\n"
-        val mimeType = "image/jpeg"
-
-        outputStream.writeBytes("$twoHyphens$boundary$lineEnd")
-        outputStream.writeBytes("Content-Disposition: form-data; name=\"$fieldName\"; filename=\"${URLEncoder.encode(file.name, "UTF-8")}\"$lineEnd")
-        outputStream.writeBytes("Content-Type: $mimeType$lineEnd")
-        outputStream.writeBytes("Content-Class-Label: $classLabel$lineEnd")
-        outputStream.writeBytes(lineEnd)
-
-        val fileInputStream = FileInputStream(file)
-        val buffer = ByteArray(1024)
-        var bytesRead = fileInputStream.read(buffer)
-
-        while (bytesRead > 0) {
-            outputStream.write(buffer, 0, bytesRead)
-            bytesRead = fileInputStream.read(buffer)
-        }
-
-        outputStream.writeBytes(lineEnd)
-        fileInputStream.close()
     }
 }

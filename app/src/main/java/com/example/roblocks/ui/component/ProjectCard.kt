@@ -159,9 +159,9 @@ fun<T: ProjectEntity> ProjectCard(
 
                                 if(showEditProject == true) {
                                     if(jenisProyek == "AI")
-                                        EditProjectDialog(onDismiss = { showCreateProject = false }, navController = navController, "AI")
+                                        EditProjectDialog("Artificial Intelligence", onDismiss = { showCreateProject = false }, navController = navController, "AI")
                                     else
-                                        EditProjectDialog(onDismiss = { showCreateProject = false}, navController = navController, "IOT")
+                                        EditProjectDialog("Robotik/IOT", onDismiss = { showCreateProject = false}, navController = navController, "IOT")
                                 }
                             }
                         }
@@ -321,9 +321,9 @@ fun<T: ProjectEntity> ProjectCard(
 
                                 if(showEditProject == true) {
                                     if(jenisProyek == "AI")
-                                        EditProjectDialog(onDismiss = { showCreateProject = false }, navController = navController, "AI")
+                                        EditProjectDialog("Artificial Intelligence", onDismiss = { showEditProject = false }, navController = navController, "AI")
                                     else
-                                        EditProjectDialog(onDismiss = { showCreateProject = false}, navController = navController, "IOT")
+                                        EditProjectDialog("Robotik/IOT", onDismiss = { showEditProject = false}, navController = navController, "IOT")
                                 }
                             }
 
@@ -423,9 +423,9 @@ fun<T: ProjectEntity> ProjectCard(
 
                         if(showEditProject == true) {
                             if(jenisProyek == "AI")
-                                EditProjectDialog(onDismiss = { showCreateProject = false }, navController = navController, "AI")
+                                EditProjectDialog("Artificial Intelligence", onDismiss = { showEditProject = false }, navController = navController, "AI")
                             else
-                                EditProjectDialog(onDismiss = { showCreateProject = false}, navController = navController, "IOT")
+                                EditProjectDialog("Robotik/IOT", onDismiss = { showEditProject = false}, navController = navController, "IOT")
                         }
 
                     }

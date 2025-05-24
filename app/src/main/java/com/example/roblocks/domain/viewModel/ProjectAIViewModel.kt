@@ -78,7 +78,7 @@ class ProjectAIViewModel @Inject constructor(
                         Log.e(TAG, "Error ", e)
                         _uiState.value = _uiState.value.copy(
                             showToast = true,
-                            toastMessage = "Gagal membuka project AI: ${e.message}"
+                            toastMessage = "Gmagal embuka project AI: ${e.message}"
                         )
                     }
                 } else {
@@ -136,7 +136,7 @@ class ProjectAIViewModel @Inject constructor(
     }
 
     fun deleteProjectByID(id: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.deleteProjectByID(id)
         }
     }

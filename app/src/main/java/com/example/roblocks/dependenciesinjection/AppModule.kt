@@ -17,8 +17,15 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import javax.inject.Singleton
+import com.example.roblocks.ai.ImageClassifier
+import com.example.roblocks.BuildConfig
+import com.example.roblocks.ai.ImageUploader
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.converter.gson.GsonConverterFactory
+import com.example.roblocks.data.remote.BackendApiService
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -26,7 +33,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideExampleApi(): exampleAPI{
+    fun provideExampleApi(): exampleAPI {
         return Retrofit.Builder()
             .baseUrl("https://example.com")
             .build()
@@ -35,13 +42,13 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRepository(api: exampleAPI): RoblocksRepository{
+    fun provideRepository(api: exampleAPI): RoblocksRepository {
         return RoblocksRepositoryImpl(api)
     }
 
     @Provides
     @Singleton
-    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase{
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(
             context.applicationContext,
             AppDatabase::class.java,
@@ -53,7 +60,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideProjectAIDao(appDatabase: AppDatabase): ProjectAIDao{
+    fun provideProjectAIDao(appDatabase: AppDatabase): ProjectAIDao {
         return appDatabase.projectAIDao()
     }
 
@@ -65,7 +72,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideProjectAIRepository(projectAIDao: ProjectAIDao): ProjectAIRepository{
+    fun provideProjectAIRepository(projectAIDao: ProjectAIDao): ProjectAIRepository {
         return ProjectAIRepositoryImpl(projectAIDao)
     }
 
@@ -73,5 +80,45 @@ object AppModule {
     @Singleton
     fun provideProjectIOTRepository(projectIOTDao: ProjectIOTDao): ProjectIOTRepository {
         return ProjectIOTRepositoryImpl(projectIOTDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient {
+        val logging = HttpLoggingInterceptor()
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+        return OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build()
+    }
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideBackendApiService(retrofit: Retrofit): BackendApiService {
+        return retrofit.create(BackendApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideImageUploader(
+        @ApplicationContext context: Context,
+        apiService: BackendApiService
+    ): ImageUploader {
+        return ImageUploader(context, apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideImageClassifier(@ApplicationContext context: Context): ImageClassifier {
+        return ImageClassifier(context)
     }
 }

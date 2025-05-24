@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "43154275218",
+    "firebase_url": "https://roblocks-rbc-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "roblocks-rbc",
+    "storage_bucket": "roblocks-rbc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:43154275218:android:d67e119a699c79fd7d1f4b",
+        "android_client_info": {
+          "package_name": "com.example.roblocks"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "43154275218-8j4ls2aqn4gbqckdarngkpt50hqpg4mp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEoI78rwLKkU6_EN2mrc4lAmjwJ4JuM4E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "43154275218-8j4ls2aqn4gbqckdarngkpt50hqpg4mp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

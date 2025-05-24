@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -21,13 +22,21 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"http://192.168.1.11:5000/\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"https://your-production-url.com/\"")
         }
     }
     compileOptions {
@@ -42,86 +51,57 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+    // Removed: implementation(libs.androidx.appcompat) - Optional, remove if unused
+    // Removed: implementation(libs.material) - Optional, remove if unused
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.navigation.compose)
-
-    // Room dependencies
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    // Room
     implementation(libs.androidx.room.ktx)
-    ksp("androidx.room:room-compiler:2.5.0")
-
+    ksp(libs.androidx.room.compiler)
     // UI
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.mpandroidchart)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation("androidx.compose.material:material-icons-extended")
-    
+    implementation(libs.material.icons.extended)
     // WebView
-    implementation("androidx.webkit:webkit:1.8.0")
-
-
-    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
-
-    implementation(libs.androidx.webkit.v1130) // Make sure you include the WebView dependency
-    implementation("androidx.compose.ui:ui:1.8.0") // Make sure you have the latest Compose version
-    implementation(libs.material3) // For Material 3
-    implementation("androidx.navigation:navigation-compose:2.5.0") // For navigation support
-
-
+    implementation(libs.androidx.webkit)
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0") // Using hardcoded version for now
     // TensorFlow Lite
-
-    implementation (libs.tensorflow.lite)
-    implementation (libs.tensorflow.lite.support)
-    implementation (libs.tensorflow.lite.metadata)
-    implementation (libs.tensorflow.lite.task.vision)
-
-
+    implementation(libs.tensorflow.lite)
+    implementation(libs.tensorflow.lite.support)
+    implementation(libs.tensorflow.lite.metadata)
+    implementation(libs.tensorflow.lite.task.vision)
     // Coroutines
-    implementation (libs.kotlinx.coroutines.android)
-    implementation (libs.androidx.lifecycle.runtime.ktx.v262)
-    implementation (libs.androidx.lifecycle.viewmodel.compose)
-
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     // File operations
-    implementation (libs.commons.io)
+    implementation(libs.commons.io)
     // Image loading
-    implementation (libs.coil.compose)
-
+    implementation(libs.coil.compose)
     implementation(libs.okhttp)
-
-    implementation (libs.okhttp)
-    implementation (libs.kotlinx.coroutines.android.v173)
-
-    implementation (libs.gson)
-
-    //dagger-hilt
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-
-
-    //retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
-
+    implementation(libs.gson)
+    // Dagger-Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    implementation(libs.hilt.navigation.compose)
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.logging.interceptor)
 }
 
 kapt {
