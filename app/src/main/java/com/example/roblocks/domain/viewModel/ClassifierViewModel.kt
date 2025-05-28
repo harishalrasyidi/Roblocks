@@ -96,7 +96,7 @@ class ClassifierViewModel : ViewModel() {
                 _uiState.update { it.copy(trainingMessage = "Training on server...") }
 
                 try {
-                    val downloadUrl = "http://192.168.1.11:5000/download-model"
+                    val downloadUrl = "https://roblocks-backend.braveisland-15412894.southeastasia.azurecontainerapps.io/download-model"
                     val file = withContext(Dispatchers.IO) {
                         val url = URL(downloadUrl)
                         val connection = url.openConnection() as HttpURLConnection

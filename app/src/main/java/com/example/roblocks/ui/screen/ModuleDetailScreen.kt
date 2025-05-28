@@ -1,6 +1,5 @@
 package com.example.roblocks.ui.screen
 
-import android.webkit.WebChromeClient
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -67,7 +66,11 @@ fun ModuleDetailScreen(
     moduleId: String,
     viewModel: ModuleQuizViewModel = viewModel()
 ) {
-    val module by viewModel.getModuleById(moduleId).collectAsState(initial = null)
+    LaunchedEffect(moduleId) {
+        viewModel.fetchModuleById(moduleId)
+    }
+
+    val module by viewModel.selectedModule.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
