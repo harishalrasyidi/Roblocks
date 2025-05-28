@@ -15,7 +15,7 @@ import java.util.UUID
 
 class ModelTrainer(private val context: Context) {
 
-    val serverUrl = "http://192.168.1.11:5000/train"  // ganti dengan alamat backend Flask
+    val serverUrl = "https://roblocks-backend.braveisland-15412894.southeastasia.azurecontainerapps.io/train"  // ganti dengan alamat backend Flask
 
     suspend fun trainModel(class1: List<Bitmap>, class2: List<Bitmap>): File = withContext(
         Dispatchers.IO) {

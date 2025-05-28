@@ -29,13 +29,16 @@ fun QuizScreen(
     moduleId: String,
     viewModel: ModuleQuizViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    LaunchedEffect(moduleId) {
+        viewModel.fetchQuestions(moduleId)
+    }
     val questions by viewModel.getQuestionsByModule(moduleId).collectAsState(initial = emptyList())
+
     var currentQuestionIndex by remember { mutableStateOf(0) }
     val answers = remember { mutableStateMapOf<Int, String>() }
     var showResult by remember { mutableStateOf(false) }
     var correctCount by remember { mutableStateOf(0) }
 
-    // Gradasi Latar Belakang
     val backgroundGradient = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF56A2DD), // Biru terang

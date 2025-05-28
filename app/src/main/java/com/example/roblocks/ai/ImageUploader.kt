@@ -33,7 +33,7 @@ class ImageUploader {
         }
 
         try {
-            val url = URL("http://192.168.1.11:5000/train") // Ganti IP sesuai backend
+            val url = URL("https://roblocks-backend.braveisland-15412894.southeastasia.azurecontainerapps.io/train") // Ganti IP sesuai backend
             val boundary = UUID.randomUUID().toString()
             val lineEnd = "\r\n"
             val twoHyphens = "--"

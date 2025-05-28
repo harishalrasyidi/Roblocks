@@ -26,6 +26,7 @@ commonsIo = "2.16.1"
 gson = "2.10.1"
 webkitVersion = "1.13.0"
 webview = "1.4.0"
+runtimeLivedata = "1.8.2"
 
 [libraries]
 androidx-webkit-v1130 = { module = "androidx.webkit:webkit", version.ref = "webkitVersion" }
@@ -66,6 +67,7 @@ tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "te
 tensorflow-lite-metadata = { module = "org.tensorflow:tensorflow-lite-metadata", version.ref = "tensorflowLiteMetadata" }
 tensorflow-lite-support = { module = "org.tensorflow:tensorflow-lite-support", version.ref = "tensorflowLiteSupport" }
 tensorflow-lite-task-vision = { module = "org.tensorflow:tensorflow-lite-task-vision", version.ref = "tensorflowLiteTaskVision" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 
 [plugins]

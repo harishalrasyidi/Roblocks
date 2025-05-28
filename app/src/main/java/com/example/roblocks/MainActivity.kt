@@ -18,8 +18,8 @@ import com.example.roblocks.ui.screen.ProfileScreen
 import com.example.roblocks.ui.screen.RoboticsScreen
 import com.example.roblocks.ai.ImageClassifierApp
 import com.example.roblocks.ui.screen.ModuleDetailScreen
-import com.example.roblocks.ui.screen.ModuleListScreen
 import com.example.roblocks.ui.screen.QuizScreen
+import com.example.roblocks.ui.screens.ModuleListScreen
 import com.example.roblocks.ui.theme.RoblocksTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
