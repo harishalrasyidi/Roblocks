@@ -31,7 +31,20 @@ class BlocklyWebViewClient(private val assetLoader: WebViewAssetLoader) : WebVie
     override fun onPageFinished(view: WebView, url: String) {
         super.onPageFinished(view, url)
         Log.d(TAG, "Page loaded: $url")
-        
+
+        // Notify that the page has finished loading
+        // Wait a bit to ensure all Blockly scripts are initialized
+        view.postDelayed({
+            view.evaluateJavascript("javascript:(function() { return window.Blockly ? 'ready' : 'not_ready'; })();") { result ->
+                Log.d(TAG, "Blockly initialization check: $result")
+                if (result.contains("ready")) {
+                    // Blockly is ready, notify BlocklyBridge
+                    view.evaluateJavascript("javascript:(function() { if (window.BlocklyBridge) { window.BlocklyBridge.notifyWebViewReady(); } })();", null)
+                    Log.d(TAG, "WebView reported as ready for XML loading")
+                }
+            }
+        }, 500) // 500ms delay to ensure scripts are loaded
+
         // Inject JavaScript to add custom event handlers for Save and Upload buttons
         // This connects the BlocklyDuino UI with our Android app
         val injectScript = """
