@@ -6,11 +6,13 @@ import android.webkit.WebView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -132,6 +134,9 @@ fun CodePreviewDialog(
     code: String,
     onDismiss: () -> Unit
 ) {
+    val viewModel: ProjectIOTViewModel = hiltViewModel()
+    val uiState by viewModel.uiState.collectAsState()
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -178,11 +183,24 @@ fun CodePreviewDialog(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                TextButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.End)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Tutup")
+                    Button(
+                        onClick = { 
+                            if (uiState.currentProjectId != null) {
+                                viewModel.exportArduinoCode(uiState.currentProjectId!!)
+                            }
+                        },
+                        enabled = uiState.currentProjectId != null
+                    ) {
+                        Text("Export ke Downloads")
+                    }
+                    
+                    TextButton(onClick = onDismiss) {
+                        Text("Tutup")
+                    }
                 }
             }
         }

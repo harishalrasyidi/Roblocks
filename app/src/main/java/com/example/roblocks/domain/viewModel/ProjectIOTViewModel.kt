@@ -2,6 +2,7 @@ package com.example.roblocks.domain.viewModel
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.os.Environment
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -318,6 +319,49 @@ class ProjectIOTViewModel @Inject constructor(
     fun deleteProjectByID(id: String) {
         viewModelScope.launch {
             repository.deleteProjectByID(id)
+        }
+    }
+
+    fun exportArduinoCode(projectId: String) {
+        viewModelScope.launch {
+            try {
+                val project = repository.getProjectById(projectId)
+                if (project != null) {
+                    // Baca file dari internal storage
+                    val internalFile = File(context.filesDir, project.file_source_code)
+                    if (!internalFile.exists()) {
+                        _uiState.value = _uiState.value.copy(
+                            showToast = true,
+                            toastMessage = "File Arduino tidak ditemukan"
+                        )
+                        return@launch
+                    }
+
+                    // Buat file di Downloads folder
+                    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    val exportFileName = "roblocks_${project.name}_${System.currentTimeMillis()}.ino"
+                    val exportFile = File(downloadsDir, exportFileName)
+
+                    // Salin file
+                    internalFile.copyTo(exportFile, overwrite = true)
+
+                    _uiState.value = _uiState.value.copy(
+                        showToast = true,
+                        toastMessage = "File berhasil diekspor ke Downloads/${exportFileName}"
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        showToast = true,
+                        toastMessage = "Proyek tidak ditemukan"
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error exporting Arduino code", e)
+                _uiState.value = _uiState.value.copy(
+                    showToast = true,
+                    toastMessage = "Gagal mengekspor file: ${e.message}"
+                )
+            }
         }
     }
 }
