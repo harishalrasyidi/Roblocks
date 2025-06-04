@@ -70,32 +70,30 @@ class ProjectIOTViewModel @Inject constructor(
     fun onWorkspaceSaved(xml: String, inoCode: String) {
         Log.d(TAG, "Workspace XML and generated code received")
         
-        // Validasi konten XML sebelum disimpan
-        if (xml.isBlank() || !xml.trim().startsWith("<xml")) {
-            Log.e(TAG, "Invalid XML received: $xml")
-            _uiState.value = _uiState.value.copy(
-                showToast = true,
-                toastMessage = "Error: XML data tidak valid"
-            )
-            return
-        }
-        
-        // Log XML untuk debugging
-        Log.d(TAG, "XML to save: ${if(xml.length > 100) xml.substring(0, 100) + "..." else xml}")
-        
-        currentWorkspaceXml = xml
+        // Simpan kode Arduino
         currentGeneratedCode = inoCode
+        
+        // Jika XML tidak kosong, validasi dan simpan
+        if (xml.isNotEmpty()) {
+            if (xml.trim().startsWith("<xml")) {
+                // Log XML untuk debugging
+                Log.d(TAG, "XML to save: ${if(xml.length > 100) xml.substring(0, 100) + "..." else xml}")
+                currentWorkspaceXml = xml
+                
+                // Jika proyek sudah ada (edit mode), update proyek langsung
+                if (_uiState.value.currentProjectId != null) {
+                    updateProject(_uiState.value.currentProjectId!!, xml, inoCode)
+                }
+            } else {
+                Log.e(TAG, "Invalid XML format received")
+            }
+        }
         
         // Auto-update the preview code if dialog is already open
         if (_uiState.value.showCodePreview) {
             _uiState.value = _uiState.value.copy(
                 generatedCode = inoCode
             )
-        }
-
-        // Jika proyek sudah ada (edit mode), update proyek langsung
-        if (_uiState.value.currentProjectId != null) {
-            updateProject(_uiState.value.currentProjectId!!, xml, inoCode)
         }
     }
 
@@ -148,7 +146,8 @@ class ProjectIOTViewModel @Inject constructor(
     
     // Update project dengan workspace dan code terbaru
     fun updateProject(projectId: String, blocklyXml: String, arduinoCode: String) {
-        if (blocklyXml.isBlank() || !blocklyXml.trim().startsWith("<xml")) {
+        // Hanya validasi XML jika bukan dari upload
+        if (blocklyXml.isNotEmpty() && !blocklyXml.trim().startsWith("<xml")) {
             Log.e(TAG, "Invalid XML format in updateProject: $blocklyXml")
             _uiState.value = _uiState.value.copy(
                 showToast = true,

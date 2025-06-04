@@ -20,6 +20,9 @@ class BlocklyBridge(
     
     // Pending XML to load once WebView is ready
     private var pendingXmlWorkspace: String? = null
+
+    // Current workspace XML
+    private var currentWorkspaceXml: String? = null
     
     @JavascriptInterface
     fun saveWorkspace(xml: String, inoCode: String) {
@@ -28,6 +31,9 @@ class BlocklyBridge(
         if (xml.isNotEmpty()) {
             // Log XML untuk debugging
             Log.d(TAG, "XML received: ${if(xml.length > 100) xml.substring(0, 100) + "..." else xml}")
+            
+            // Save current XML
+            currentWorkspaceXml = xml
             
             // Kirim data ke ViewModel
             onWorkspaceSaved(xml, inoCode)
@@ -68,29 +74,15 @@ class BlocklyBridge(
      * This function will be called from JavaScript when user clicks Upload button
      */
     @JavascriptInterface
-    fun uploadCode() {
+    fun uploadCode(arduinoCode: String) {
         Log.d(TAG, "Upload code requested from BlocklyDuino")
-        webView.post {
-            webView.evaluateJavascript(
-                "javascript:(function() { return { xml: Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace)), code: Blockly.Arduino.workspaceToCode() }; })()",
-            ) { result ->
-                try {
-                    // Parse the result which comes as a JavaScript object string
-                    // Basic parsing: the result is in the format: {"xml":"...","code":"..."}
-                    val xml = result.substringAfter("\"xml\":\"").substringBefore("\",\"code\"")
-                    val code = result.substringAfter("\"code\":\"").substringBefore("\"}")
-                    
-                    // Clean up escaped characters
-                    val cleanXml = xml.replace("\\\"", "\"").replace("\\n", "\n")
-                    val cleanCode = code.replace("\\\"", "\"").replace("\\n", "\n")
-                    
-                    onWorkspaceSaved(cleanXml, cleanCode)
-                    // Show code preview dialog automatically
-                    onShowSaveDialog()
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error parsing upload result", e)
-                }
-            }
+        try {
+            // Save the Arduino code for upload
+            onWorkspaceSaved(currentWorkspaceXml ?: "", arduinoCode)
+            // Show code preview dialog automatically
+            onShowSaveDialog()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during upload", e)
         }
     }
     

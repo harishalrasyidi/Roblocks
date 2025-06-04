@@ -518,18 +518,12 @@
         // Upload button - for Arduino upload
         document.getElementById('uploadButton').addEventListener('click', function() {
             try {
-                // Generate code first
+                // Generate Arduino code
                 var code = Blockly.Arduino.workspaceToCode(workspace);
-                
-                // Get XML as well for recording the state
-                var xml = Blockly.Xml.workspaceToDom(workspace);
-                var xmlText = Blockly.Xml.domToText(xml);
                 
                 // Call bridge function if available
                 if (window.BlocklyBridge) {
-                    window.BlocklyBridge.saveWorkspace(xmlText, code);
-                    // We're uploading, so we can call uploadCode on the bridge
-                    window.BlocklyBridge.uploadCode();
+                    window.BlocklyBridge.uploadCode(code);
                     window.BlocklyBridge.logMessage("Upload requested");
                 } else {
                     console.log("Upload button clicked - but BlocklyBridge not available");
