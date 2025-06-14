@@ -1,5 +1,6 @@
 package com.example.roblocks.data.remote
 
+import com.example.roblocks.ai.TrainingResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.http.*
@@ -8,13 +9,14 @@ interface BackendApiService {
     @Multipart
     @POST("train")
     suspend fun uploadImages(
+        @Query("session_id") sessionId: String,
         @Part images: List<MultipartBody.Part>,
-        @Part("class_label") classLabels: List<String>,
+        @Part classLabelParts: List<MultipartBody.Part>,
         @Query("epochs") epochs: Int,
         @Query("batch_size") batchSize: Int,
         @Query("learning_rate") learningRate: Float
-    ): Map<String, Any>
+    ): TrainingResponse
 
     @GET("download_model")
-    suspend fun downloadModel(): ResponseBody
+    suspend fun downloadModel(@Query("session_id") sessionId: String): ResponseBody
 }

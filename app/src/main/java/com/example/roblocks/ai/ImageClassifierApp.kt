@@ -89,7 +89,7 @@ fun FlexibleClassUI(
         onResult = { success ->
             if (success) {
                 val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-                val currentClass = classes.indexOfFirst { it.name == "Class $selectedClass" }
+                val currentClass = classes.indexOfFirst { it.name == "Class_$selectedClass" }
                 if (currentClass != -1) {
                     onAddImage(currentClass, bitmap)
                 }
@@ -106,7 +106,7 @@ fun FlexibleClassUI(
     ) { uri: Uri? ->
         uri?.let {
             getBitmapFromUri(context, it)?.let { bmp ->
-                val currentClass = classes.indexOfFirst { it.name == "Class $selectedClass" }
+                val currentClass = classes.indexOfFirst { it.name == "Class_$selectedClass" }
                 if (currentClass != -1) {
                     onAddImage(currentClass, bmp)
                 }
@@ -446,74 +446,118 @@ fun ImageClassifierApp(navController: NavController, projectID: String? = null) 
     val imageClasses by viewModel.imageClasses.collectAsState()
     val scrollState = rememberScrollState()
     val uiStateAI by aiViewModel.uiState.collectAsState()
+    val deployed = false //ubah jadi true saat sudah di deploy
+    var permissionsGranted = false
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val allGranted = permissions.all { it.value }
-        if (!allGranted) {
+        val cameraGranted = permissions[Manifest.permission.CAMERA] == true
+        val storageGranted = permissions[Manifest.permission.READ_MEDIA_IMAGES] == true ||
+                permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true
+        if (!cameraGranted || !storageGranted) {
             viewModel.setTrainingError("Camera and storage permissions required")
-        }
-    }
-
-    LaunchedEffect(projectID) {
-        if (projectID != null) {
-            aiViewModel.loadProject(projectID)
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            arrayOf(
-                Manifest.permission.CAMERA,
-                Manifest.permission.READ_MEDIA_IMAGES
-            )
         } else {
-            arrayOf(
-                Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-        }
-        if (permissions.any {
-                ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
-            }) {
-            permissionLauncher.launch(permissions)
+            viewModel.setTrainingError(null)
         }
     }
 
-    if (uiState.showPermissionDialog) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissPermissionDialog() },
-            title = { Text("Permissions Needed") },
-            text = { Text("This app needs camera and storage access to capture and load images.") },
-            confirmButton = {
-                Button(onClick = {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.parse("package:${context.packageName}")
-                    }
-                    context.startActivity(intent)
-                    viewModel.dismissPermissionDialog()
+    //logic untuk check permission saat aplikasi sudah deploy
+
+    if(deployed) {
+        LaunchedEffect(Unit) {
+            val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                arrayOf(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.READ_MEDIA_IMAGES
+                )
+            } else {
+                arrayOf(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            }
+            if (permissions.any {
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        it
+                    ) != PackageManager.PERMISSION_GRANTED
                 }) {
-                    Text("Open Settings")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { viewModel.dismissPermissionDialog() }) {
-                    Text("Cancel")
+                permissionLauncher.launch(permissions)
+            }
+        }
+
+        permissionsGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED &&
+                (
+                        (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.READ_MEDIA_IMAGES
+                                ) == PackageManager.PERMISSION_GRANTED) ||
+                                (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU &&
+                                        ContextCompat.checkSelfPermission(
+                                            context,
+                                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                        ) == PackageManager.PERMISSION_GRANTED)
+                        )
+    }
+    else{
+        viewModel.setTrainingError(null)
+        permissionsGranted = true
+    }
+
+
+    if (!permissionsGranted) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text("Permissions Required") },
+            text = { Text("Camera and storage permissions are required to use this feature.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            arrayOf(
+                                Manifest.permission.CAMERA,
+                                Manifest.permission.READ_MEDIA_IMAGES
+                            )
+                        } else {
+                            arrayOf(
+                                Manifest.permission.CAMERA,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            )
+                        }
+                        // Check if we should show rationale or open settings
+                        val shouldShowRationale = permissions.any {
+                            androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale(
+                                (context as android.app.Activity), it
+                            )
+                        }
+                        if (shouldShowRationale) {
+                            permissionLauncher.launch(permissions)
+                        } else {
+                            // Open app settings if "Don't ask again" was selected
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.parse("package:${context.packageName}")
+                            }
+                            context.startActivity(intent)
+                        }
+                    }
+                ) {
+                    Text("Grant Permissions")
                 }
             }
         )
+        // Optionally, show error message
+        uiState.trainingError?.let {
+            Text(text = it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp))
+        }
+        return
     }
 
-    val testImagePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            getBitmapFromUri(context, it)?.let { bmp ->
-                viewModel.classifyImage(bmp, context)
-            }
-        }
-    }
+    viewModel.setTrainingError(null)
 
     Scaffold(
         topBar = {
