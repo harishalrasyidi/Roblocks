@@ -2,13 +2,15 @@ package com.example.roblocks.domain.viewModel
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.roblocks.ai.ImageClass
 import com.example.roblocks.ai.ImageClassifier
 import com.example.roblocks.ai.ImageUploader
-import com.example.roblocks.ai.ModelTrainer
 import com.example.roblocks.ai.PermissionUtils
+import com.example.roblocks.ai.TrainingResponse
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,25 +18,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
-import java.net.HttpURLConnection
-import java.net.URL
+import retrofit2.HttpException
+import javax.inject.Inject
+import kotlin.Result
 
-
-class ClassifierViewModel : ViewModel() {
-
+@HiltViewModel
+class ClassifierViewModel @Inject constructor(
+    private val imageUploader: ImageUploader,
+    private val imageClassifier: ImageClassifier
+) : ViewModel() {
     private val _uiState = MutableStateFlow(ClassifierUiState())
-    val uiState: StateFlow<ClassifierUiState> = _uiState
+    val uiState: StateFlow<ClassifierUiState> = _uiState.asStateFlow()
 
-    private var classifier: ImageClassifier? = null
-
-    private val _imageClasses = MutableStateFlow(listOf(ImageClass("Class 1"), ImageClass("Class 2")))
+    private val _imageClasses = MutableStateFlow(listOf(ImageClass("Class_1"), ImageClass("Class_2")))
     val imageClasses: StateFlow<List<ImageClass>> = _imageClasses.asStateFlow()
 
     fun addNewClass() {
-        val newClassName = "Class ${_imageClasses.value.size + 1}"
-        _imageClasses.value = _imageClasses.value + ImageClass(newClassName)
+        val newClassName = "Class_${_imageClasses.value.size + 1}"
+        _imageClasses.value += ImageClass(newClassName)
     }
 
     fun addImageToClass(classIndex: Int, bitmap: Bitmap) {
@@ -45,126 +46,176 @@ class ClassifierViewModel : ViewModel() {
                 images = currentList[classIndex].images + bitmap
             )
             _imageClasses.value = currentList.toList()
-
             val className = currentList[classIndex].name
-            if (className == "Class 1") {
+            if (className == "Class_1") {
                 _uiState.update { it.copy(class1Images = it.class1Images + bitmap) }
-            } else if (className == "Class 2") {
+            } else if (className == "Class_2") {
                 _uiState.update { it.copy(class2Images = it.class2Images + bitmap) }
             }
         }
     }
 
+    fun changeClassName(classIndex: Int, newName: String) {
+        if (classIndex < _imageClasses.value.size) {
+            val updatedClasses = _imageClasses.value.toMutableList()
+            updatedClasses[classIndex] = updatedClasses[classIndex].copy(name = newName)
+            _imageClasses.value = updatedClasses.toList()
+        }
+    }
+
     fun addClass1Image(bitmap: Bitmap) {
-        _uiState.value = _uiState.value.copy(
-            class1Images = _uiState.value.class1Images + bitmap
-        )
+        _uiState.update { it.copy(class1Images = it.class1Images + bitmap) }
+        addImageToClass(0, bitmap)
     }
 
     fun addClass2Image(bitmap: Bitmap) {
-        _uiState.value = _uiState.value.copy(
-            class2Images = _uiState.value.class2Images + bitmap
-        )
+        _uiState.update { it.copy(class2Images = it.class2Images + bitmap) }
+        addImageToClass(1, bitmap)
     }
 
     fun setSelectedClass(cls: Int) {
-        _uiState.value = _uiState.value.copy(selectedClass = cls)
+        _uiState.update { it.copy(selectedClass = cls) }
     }
 
     fun setPredictionResult(result: String, confidence: Float) {
-        _uiState.value = _uiState.value.copy(predictionResult = result, confidence = confidence)
+        _uiState.update { it.copy(predictionResult = result, confidence = confidence) }
     }
 
-    fun setTrainingError(message: String) {
-        _uiState.value = _uiState.value.copy(trainingError = message)
+    fun setTrainingError(message: String?) {
+        _uiState.update { it.copy(trainingError = message) }
+    }
+
+    fun updateEpochs(epochs: Int) {
+        _uiState.update { it.copy(epochs = epochs.coerceIn(1, 100)) }
+    }
+
+    fun updateBatchSize(batchSize: Int) {
+        _uiState.update { it.copy(batchSize = batchSize.coerceIn(1, 64)) }
+    }
+
+    fun updateLearningRate(learningRate: Float) {
+        _uiState.update { it.copy(learningRate = learningRate.coerceIn(0.001f, 0.01f)) }
+    }
+
+    private fun validateAllClasses() {
+        val minImages = 3 // Match ImageUploader.MIN_IMAGES_PER_CLASS
+        val invalidClass = _imageClasses.value.firstOrNull { it.images.size < minImages }
+        if (invalidClass != null) {
+            setTrainingError("Not enough images in ${invalidClass.name}. Minimum $minImages required.")
+        } else {
+            setTrainingError(null)
+        }
     }
 
     fun trainModel(context: Context) {
+        validateAllClasses()
+        if (_uiState.value.trainingError != null) return
+
         viewModelScope.launch {
             _uiState.update { it.copy(isTraining = true, trainingError = null, trainingMessage = "Uploading images...") }
-
-            val uploader = ImageUploader()
-            // Collect all images from all classes
             val allImages = _imageClasses.value.flatMap { it.images }
             val classLabels = _imageClasses.value.map { it.name }
             val imagesPerClass = _imageClasses.value.map { it.images.size }
+            val epochs = _uiState.value.epochs ?: 20
+            val batchSize = _uiState.value.batchSize ?: 16
+            val learningRate = _uiState.value.learningRate ?: 0.001f
 
+            Log.d("ClassifierViewModel", "Training with epochs=$epochs, batchSize=$batchSize, learningRate=$learningRate, images=${allImages.size}, labels=$classLabels")
 
-            val uploadSuccess = uploader.uploadImages(context, allImages, classLabels, imagesPerClass)
+            val uploadResult = imageUploader.uploadImages(
+                allImages, classLabels, imagesPerClass,
+                epochs, batchSize, learningRate
+            )
+            if (uploadResult.isSuccess) {
+                val response = uploadResult.getOrThrow()
 
-            if (uploadSuccess) {
-                _uiState.update { it.copy(trainingMessage = "Training on server...") }
-
-                try {
-                    val downloadUrl = "https://roblocks-backend.braveisland-15412894.southeastasia.azurecontainerapps.io/download-model"
-                    val file = withContext(Dispatchers.IO) {
-                        val url = URL(downloadUrl)
-                        val connection = url.openConnection() as HttpURLConnection
-                        connection.requestMethod = "GET"
-                        connection.connect()
-
-                        if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                            val inputStream = connection.inputStream
-                            val modelFile = File(context.filesDir, "color_classifier.tflite")
-                            val outputStream = FileOutputStream(modelFile)
-                            inputStream.copyTo(outputStream)
-                            outputStream.close()
-                            inputStream.close()
-                            modelFile
-                        } else null
+                if (uploadResult.isSuccess) {
+                    val response = uploadResult.getOrThrow()
+                    // Update trainingMetrics here, before downloading the model
+                    val trainingMetrics = mapOf(
+                        "accuracy" to response.metrics_history.accuracy,
+                        "val_accuracy" to response.metrics_history.val_accuracy,
+                        "loss" to response.metrics_history.loss,
+                        "val_loss" to response.metrics_history.val_loss
+                    )
+                    _uiState.update {
+                        it.copy(
+                            trainingMetrics = trainingMetrics,
+                            trainingMessage = "Training complete. Downloading model...",
+                            isTraining = false // Optionally set to false if you want to stop the spinner
+                        )
                     }
+                }
 
-                    if (file != null) {
-                        if (classifier == null) {
-                            classifier = ImageClassifier(context)
-                        }
-                        classifier?.loadModel(file)
-                        // Train with all classes' images
-                        classifier?.setTrainingData(_imageClasses.value.map { it.images }, classLabels)
+                val modelPath = response.model_path ?: "model.tflite"
+                val modelResult = imageUploader.downloadModel(sessionId = "debug_session", context = context)
+
+                Log.d("ClassifierViewModel", "Backend response: $response")
+                if (response.status == "success") {
+                    _uiState.update { it.copy(trainingMessage = "Downloading model...") }
+                    if (modelResult.isSuccess) {
+                        val modelFile = modelResult.getOrThrow()
+                        imageClassifier.loadModel(modelFile)
+                        imageClassifier.setClassLabels(classLabels)
+                        val trainingMetrics = mapOf(
+                            "accuracy" to response.metrics_history.accuracy,
+                            "val_accuracy" to response.metrics_history.val_accuracy,
+                            "loss" to response.metrics_history.loss,
+                            "val_loss" to response.metrics_history.val_loss
+                        )
                         _uiState.update {
                             it.copy(
                                 isTraining = false,
-                                modelTrained = true
+                                modelTrained = true,
+                                trainingMessage = "Model trained successfully (Validation Accuracy: ${response.final_val_accuracy})",
+                                trainingMetrics = trainingMetrics,
+                                trainingError = if (response.final_val_accuracy < 0.7f) {
+                                    "Low validation accuracy. Consider adding more images."
+                                } else null
                             )
                         }
                     } else {
                         _uiState.update {
                             it.copy(
                                 isTraining = false,
-                                trainingError = "Failed to download model"
+                                trainingError = "Failed to download model: ${modelResult.exceptionOrNull()?.message ?: "Unknown error"}"
                             )
                         }
                     }
-                } catch (e: Exception) {
+                } else {
                     _uiState.update {
                         it.copy(
                             isTraining = false,
-                            trainingError = "Training failed: ${e.message}"
+                            trainingError = "Training failed: ${response.status}"
                         )
                     }
                 }
             } else {
+                val errorMessage = when (val e = uploadResult.exceptionOrNull()) {
+                    is HttpException -> {
+                        val errorBody = e.response()?.errorBody()?.string() ?: "Unknown error"
+                        when (e.code()) {
+                            400 -> "Invalid request: $errorBody"
+                            404 -> "Server endpoint not found"
+                            else -> "Network error: ${e.message}"
+                        }
+                    }
+                    else -> "Training failed: ${e?.message ?: "Unknown error"}"
+                }
                 _uiState.update {
                     it.copy(
                         isTraining = false,
-                        trainingError = "Failed to upload images"
+                        trainingError = errorMessage
                     )
                 }
             }
         }
     }
 
-
-
-
     fun classifyImage(bitmap: Bitmap, context: Context) {
         viewModelScope.launch {
             try {
-                if (classifier == null) {
-                    classifier = ImageClassifier(context)
-                    // model sudah harus di-load sebelumnya saat training
-                }
-                val (label, confidence) = classifier?.classify(bitmap) ?: Pair("Unknown", 0f)
+                val (label, confidence) = imageClassifier.classify(bitmap)
                 setPredictionResult(label, confidence)
             } catch (e: Exception) {
                 setTrainingError("Classification error: ${e.message}")
@@ -172,60 +223,43 @@ class ClassifierViewModel : ViewModel() {
         }
     }
 
-    fun downloadTrainedModel(
-        context: Context,
-        url: String,
-        onSuccess: (File) -> Unit,
-        onError: (String) -> Unit
-    ) {
-        viewModelScope.launch {
-            try {
-                val trainer = ModelTrainer(context)
-                val file = withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    trainer.downloadModel(url)
-                }
-                classifier = ImageClassifier(context)
-                classifier?.loadModel(file)
-                _uiState.value = _uiState.value.copy(modelTrained = true)
-                onSuccess(file)
-            } catch (e: Exception) {
-                onError(e.message ?: "Unknown error")
-            }
-        }
-    }
-
-
-    // --- Permission Helpers (opsional) ---
     fun hasStoragePermissions(context: Context): Boolean {
         return PermissionUtils.hasStoragePermissions(context)
     }
 
     fun requestStoragePermission(context: Context) {
-        _uiState.value = _uiState.value.copy(showPermissionDialog = true)
+        _uiState.update { it.copy(showPermissionDialog = true) }
     }
 
     fun dismissPermissionDialog() {
-        _uiState.value = _uiState.value.copy(showPermissionDialog = false)
+        _uiState.update { it.copy(showPermissionDialog = false) }
     }
 
     fun resetPermissionRequest() {
-        _uiState.value = _uiState.value.copy(shouldRequestStoragePermission = false)
+        _uiState.update { it.copy(shouldRequestStoragePermission = false) }
+    }
+
+    override fun onCleared() {
+        imageClassifier.close()
+        super.onCleared()
     }
 
     data class ClassifierUiState(
-        val class1Images: List<Bitmap> = emptyList(),
-        val class2Images: List<Bitmap> = emptyList(),
-        val isTraining: Boolean = false,
-        val modelTrained: Boolean = false,
-        val trainingMessage: String? = null,
-        val trainingError: String? = null,
-        val predictionResult: String? = null,
-        val confidence: Float = 0f,
-        val showPermissionDialog: Boolean = false,
-        val shouldRequestStoragePermission: Boolean = false,
-        val selectedClass: Int = 1,
-        val epochs: Int = 10,
-        val batchSize: Int = 32,
-        val learningRate: Float = 0.001f
+        var class1Images: List<Bitmap> = emptyList(),
+        var class2Images: List<Bitmap> = emptyList(),
+        var isTraining: Boolean = false,
+        var modelTrained: Boolean = false,
+        var trainingMessage: String? = null,
+        var trainingError: String? = null,
+        var predictionResult: String? = null,
+        var listOfPredictionResult: List<String> = emptyList(),
+        var confidence: Float = 0f,
+        var showPermissionDialog: Boolean = false,
+        var shouldRequestStoragePermission: Boolean = false,
+        var selectedClass: Int = 1,
+        var epochs: Int? = null,
+        var batchSize: Int? = null,
+        var learningRate: Float? = null,
+        var trainingMetrics: Map<String, List<Float>>? = null
     )
 }
