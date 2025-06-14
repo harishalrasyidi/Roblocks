@@ -148,7 +148,7 @@ class ClassifierViewModel @Inject constructor(
                 }
 
                 val modelPath = response.model_path ?: "model.tflite"
-                val modelResult = imageUploader.downloadModel(sessionId = "debug_session")
+                val modelResult = imageUploader.downloadModel(sessionId = "debug_session", context = context)
 
                 Log.d("ClassifierViewModel", "Backend response: $response")
                 if (response.status == "success") {
