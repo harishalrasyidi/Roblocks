@@ -52,17 +52,14 @@ fun ArtificialIntelligenceScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(20.dp)
         ) {
             Text("Halaman,", color = Color.Gray)
             Text("Artificial Intelligence", fontWeight = FontWeight.Bold, fontSize = 20.sp)
 
             Spacer(modifier = Modifier.height(20.dp))
-//tambah kondisi jadi ada list project waktu DAO udah beres
+            //tambah kondisi jadi ada list project waktu DAO udah beres
             ProjectCard("Project AI", false, "AI", navController = navController, projectList )
-
             Spacer(modifier = Modifier.height(24.dp))
-
             ArticleCard(
                 icon = R.drawable.ic_buku,
                 title = "Learn",
