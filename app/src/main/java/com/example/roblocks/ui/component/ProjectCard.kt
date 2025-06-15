@@ -159,9 +159,19 @@ fun<T: ProjectEntity> ProjectCard(
 
                                 if(showEditProject == true) {
                                     if(jenisProyek == "AI")
-                                        EditProjectDialog(onDismiss = { showCreateProject = false }, navController = navController, "AI")
+                                        EditProjectDialog(
+                                            title = title,
+                                            onDismiss = { showEditProject = false },
+                                            navController = navController,
+                                            tipe = "AI"
+                                        )
                                     else
-                                        EditProjectDialog(onDismiss = { showCreateProject = false}, navController = navController, "IOT")
+                                        EditProjectDialog(
+                                            title = title,
+                                            onDismiss = { showEditProject = false },
+                                            navController = navController,
+                                            tipe = "IOT"
+                                        )
                                 }
                             }
                         }
@@ -321,9 +331,19 @@ fun<T: ProjectEntity> ProjectCard(
 
                                 if(showEditProject == true) {
                                     if(jenisProyek == "AI")
-                                        EditProjectDialog(onDismiss = { showCreateProject = false }, navController = navController, "AI")
+                                        EditProjectDialog(
+                                            title = title,
+                                            onDismiss = { showEditProject = false },
+                                            navController = navController,
+                                            tipe = "AI"
+                                        )
                                     else
-                                        EditProjectDialog(onDismiss = { showCreateProject = false}, navController = navController, "IOT")
+                                        EditProjectDialog(
+                                            title = title,
+                                            onDismiss = { showEditProject = false },
+                                            navController = navController,
+                                            tipe = "IOT"
+                                        )
                                 }
                             }
 
@@ -423,9 +443,19 @@ fun<T: ProjectEntity> ProjectCard(
 
                         if(showEditProject == true) {
                             if(jenisProyek == "AI")
-                                EditProjectDialog(onDismiss = { showCreateProject = false }, navController = navController, "AI")
+                                EditProjectDialog(
+                                    title = title,
+                                    onDismiss = { showEditProject = false },
+                                    navController = navController,
+                                    tipe = "AI"
+                                )
                             else
-                                EditProjectDialog(onDismiss = { showCreateProject = false}, navController = navController, "IOT")
+                                EditProjectDialog(
+                                    title = title,
+                                    onDismiss = { showEditProject = false },
+                                    navController = navController,
+                                    tipe = "IOT"
+                                )
                         }
 
                     }

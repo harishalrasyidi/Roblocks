@@ -45,6 +45,7 @@ import com.example.roblocks.R
 import com.example.roblocks.data.entities.ProjectEntity
 import com.example.roblocks.domain.viewModel.ProjectAIViewModel
 import com.example.roblocks.domain.viewModel.ProjectIOTViewModel
+import android.util.Log
 
 @Composable
 fun EditProjectDialog(title: String, onDismiss: () -> Unit, navController: NavController, tipe: String) {
@@ -95,7 +96,7 @@ fun EditProjectDialog(title: String, onDismiss: () -> Unit, navController: NavCo
                         state?.let { projectList ->
                             if(projectList.isNotEmpty()){
                                 projectList.forEach {
-                                    CardEditProyek(it.name, it.tipe, onDismiss, it.updated_at, navController, it.id)
+                                    CardEditProyek(it.name, it.tipe, onDismiss, it.updated_at, navController, it.id, robotViewModel = projectIOTViewModel)
                                     Spacer(modifier = Modifier.height(4.dp))
                                 }
                             }
@@ -110,8 +111,8 @@ fun EditProjectDialog(title: String, onDismiss: () -> Unit, navController: NavCo
             }
         },
         confirmButton = {
-        },
 
+        },
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("Cancel",
@@ -135,11 +136,11 @@ fun CardEditProyek(
     onDismiss: () -> Unit,
     lastUpdate: Long,
     navController: NavController,
-    id: String
+    id: String,
+    robotViewModel: ProjectIOTViewModel
 ) {
     var inputNamaProyek by remember { mutableStateOf(false) }
     val aiViewModel: ProjectAIViewModel = hiltViewModel()
-    val robotViewModel: ProjectIOTViewModel = hiltViewModel()
 
         Card(
             modifier = Modifier
@@ -190,13 +191,11 @@ fun CardEditProyek(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        if(tipe == "")
                             Icon(
                                 painter = painterResource(R.drawable.open_proyek_illustration),
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .size(60.dp)
-                                    .clip(RoundedCornerShape(16.dp)),
+                                    .size(30.dp),
                                 tint = Color.White,
                             )
 
@@ -213,7 +212,8 @@ fun CardEditProyek(
                 ) {
                     Button(
                         onClick = { /* TODO */ },
-                        colors = ButtonDefaults.buttonColors(Color(0xFFF4C543)),
+//                        colors = ButtonDefaults.buttonColors(Color(0xFFF4C543)),
+                        colors = ButtonDefaults.buttonColors(Color.Transparent),
                         shape = RoundedCornerShape(50),
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                         modifier = Modifier.weight(1f)
@@ -222,7 +222,7 @@ fun CardEditProyek(
                             text = "Edit Proyek",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = Color.Transparent
                         )
                     }
 
@@ -230,15 +230,16 @@ fun CardEditProyek(
 
                     Button(
                         onClick = {
-                            if(tipe == "IOT"){
-                                robotViewModel.deleteProjectByID(id)
-
+                            if(tipe == "ESP32" || tipe == "Arduino Uno" || tipe == "ESP8266"){
+                                Log.d("CardEditProyek", "Delete button clicked for id: $id")
+                                robotViewModel.deleteProjectByID(id.toString())
                             }
                             else{
+                                Log.d("CardEditProyek", "Delete button clicked for id: $id")
+                                Log.d("CardEditProyek", "Tipe: $tipe")
+
                                 aiViewModel.deleteProjectByID(id)
                             }
-
-
                                   },
                         colors = ButtonDefaults.buttonColors(Color(0xFFC8412A)),
                         shape = RoundedCornerShape(50),

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import android.util.Log
 
 @Singleton
 class ProjectIOTRepositoryImpl @Inject constructor(
@@ -63,6 +64,11 @@ class ProjectIOTRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteProjectByID(id: String) {
-        projectIOTDao.deleteProjectById(id)
+        try {
+            val rows = projectIOTDao.deleteProjectById(id)
+            Log.d("ProjectIOTRepository", "Rows deleted: $rows for id: $id")
+        } catch (e: Exception) {
+            Log.e("ProjectIOTRepository", "Delete failed", e)
+        }
     }
 }

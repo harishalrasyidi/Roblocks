@@ -52,6 +52,7 @@ fun ArtificialIntelligenceScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .padding(20.dp)
         ) {
             Text("Halaman,", color = Color.Gray)
             Text("Artificial Intelligence", fontWeight = FontWeight.Bold, fontSize = 20.sp)

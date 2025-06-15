@@ -22,7 +22,7 @@ interface ProjectIOTDao {
     suspend fun insertProject(project: ProjectIOTEntity)
 
     @Query("DELETE FROM ProyekRobot_table WHERE id = :id")
-    fun deleteProjectById(id: String): Int
+    suspend fun deleteProjectById(id: String): Int
     
     @Update
     suspend fun updateProject(project: ProjectIOTEntity)
