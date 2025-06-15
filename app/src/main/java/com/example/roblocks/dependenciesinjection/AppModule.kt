@@ -26,11 +26,16 @@ import com.example.roblocks.ai.ImageUploader
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.converter.gson.GsonConverterFactory
 import com.example.roblocks.data.remote.BackendApiService
+import com.example.roblocks.data.remote.BackendApiServiceClassifier
 import java.util.concurrent.TimeUnit
+import javax.inject.Qualifier
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    private val ROBLOCKS_URL = "https://roblocks.pythonanywhere.com"
+    private val CLASSIFIER_URL = "http://192.168.1.4:5000/"
 
     @Provides
     @Singleton
@@ -87,18 +92,19 @@ object AppModule {
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
-            .connectTimeout(120, TimeUnit.SECONDS)
-            .readTimeout(120, TimeUnit.SECONDS)
-            .writeTimeout(120, TimeUnit.SECONDS)
+            .connectTimeout(1000, TimeUnit.SECONDS)
+            .readTimeout(1000, TimeUnit.SECONDS)
+            .writeTimeout(1000, TimeUnit.SECONDS)
             .callTimeout(50, TimeUnit.MINUTES)
             .build()
     }
 
     @Provides
     @Singleton
+    @RetrofitRoblocks
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
+            .baseUrl(ROBLOCKS_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -106,15 +112,36 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideBackendApiService(retrofit: Retrofit): BackendApiService {
+    @RetrofitClassifier
+    fun provideClassfierRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(CLASSIFIER_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideBackendApiService(
+        @RetrofitRoblocks retrofit: Retrofit
+    ): BackendApiService {
         return retrofit.create(BackendApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBackendImageClassifier(
+        @RetrofitClassifier retrofit: Retrofit
+    ): BackendApiServiceClassifier {
+        return retrofit.create(BackendApiServiceClassifier::class.java)
     }
 
     @Provides
     @Singleton
     fun provideImageUploader(
         @ApplicationContext context: Context,
-        apiService: BackendApiService
+        apiService: BackendApiServiceClassifier
     ): ImageUploader {
         return ImageUploader(context, apiService)
     }
@@ -125,3 +152,11 @@ object AppModule {
         return ImageClassifier(context)
     }
 }
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class RetrofitClassifier
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class RetrofitRoblocks

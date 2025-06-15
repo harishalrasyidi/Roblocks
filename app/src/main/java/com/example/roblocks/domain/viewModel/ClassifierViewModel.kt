@@ -90,7 +90,7 @@ class ClassifierViewModel @Inject constructor(
     }
 
     fun updateBatchSize(batchSize: Int) {
-        _uiState.update { it.copy(batchSize = batchSize.coerceIn(1, 64)) }
+        _uiState.update { it.copy(batchSize = batchSize.coerceIn(1, 256)) }
     }
 
     fun updateLearningRate(learningRate: Float) {
@@ -120,8 +120,6 @@ class ClassifierViewModel @Inject constructor(
             val batchSize = _uiState.value.batchSize ?: 16
             val learningRate = _uiState.value.learningRate ?: 0.001f
 
-            Log.d("ClassifierViewModel", "Training with epochs=$epochs, batchSize=$batchSize, learningRate=$learningRate, images=${allImages.size}, labels=$classLabels")
-
             val uploadResult = imageUploader.uploadImages(
                 allImages, classLabels, imagesPerClass,
                 epochs, batchSize, learningRate
@@ -129,34 +127,16 @@ class ClassifierViewModel @Inject constructor(
             if (uploadResult.isSuccess) {
                 val response = uploadResult.getOrThrow()
 
-                if (uploadResult.isSuccess) {
-                    val response = uploadResult.getOrThrow()
-                    // Update trainingMetrics here, before downloading the model
-                    val trainingMetrics = mapOf(
-                        "accuracy" to response.metrics_history.accuracy,
-                        "val_accuracy" to response.metrics_history.val_accuracy,
-                        "loss" to response.metrics_history.loss,
-                        "val_loss" to response.metrics_history.val_loss
-                    )
-                    _uiState.update {
-                        it.copy(
-                            trainingMetrics = trainingMetrics,
-                            trainingMessage = "Training complete. Downloading model...",
-                            isTraining = false // Optionally set to false if you want to stop the spinner
-                        )
-                    }
-                }
-
-                val modelPath = response.model_path ?: "model.tflite"
-                val modelResult = imageUploader.downloadModel(sessionId = "debug_session", context = context)
-
-                Log.d("ClassifierViewModel", "Backend response: $response")
                 if (response.status == "success") {
                     _uiState.update { it.copy(trainingMessage = "Downloading model...") }
+
+                    val modelResult = imageUploader.downloadModel(context = context, sessionId = response.session_id)
+
                     if (modelResult.isSuccess) {
                         val modelFile = modelResult.getOrThrow()
                         imageClassifier.loadModel(modelFile)
-                        imageClassifier.setClassLabels(classLabels)
+                        imageClassifier.setClassLabels(response.class_names_inferred)
+
                         val trainingMetrics = mapOf(
                             "accuracy" to response.metrics_history.accuracy,
                             "val_accuracy" to response.metrics_history.val_accuracy,
@@ -260,6 +240,7 @@ class ClassifierViewModel @Inject constructor(
         var epochs: Int? = null,
         var batchSize: Int? = null,
         var learningRate: Float? = null,
-        var trainingMetrics: Map<String, List<Float>>? = null
+        var trainingMetrics: Map<String, List<Float>>? = null,
+        var session_id: String = "session_test_debug"
     )
 }

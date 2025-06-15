@@ -12,6 +12,8 @@ import com.example.roblocks.data.entities.ProjectIOTEntity
 import com.example.roblocks.domain.repository.ProjectAIRepository
 import com.example.roblocks.domain.repository.ProjectIOTRepository
 import com.example.roblocks.domain.repository.RoblocksRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +33,11 @@ class RoblocksViewModel @Inject constructor(
     private val context = getApplication<Application>().applicationContext
     private val _uiState = MutableStateFlow(RoblocksState())
     private val _newestProjectName = MutableStateFlow(String)
+    private val _user = MutableStateFlow<FirebaseUser?>(null)
     val uiState: StateFlow<RoblocksState> = _uiState.asStateFlow()
+    val user: StateFlow<FirebaseUser?> = _user.asStateFlow()
+    val userEmail: String?
+        get() = _user.value?.email
 
     fun saveProject(project: ProjectEntity){
         viewModelScope.launch {
@@ -47,6 +53,10 @@ class RoblocksViewModel @Inject constructor(
         }
     }
 
+    fun updateUserFromAuth() {
+        _user.value = FirebaseAuth.getInstance().currentUser
+    }
+
 }
 
 data class RoblocksState(
@@ -58,3 +68,4 @@ data class RoblocksState(
     val menu: Int = 0,
     val newestProjectName: String = ""
 )
+

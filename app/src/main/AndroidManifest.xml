@@ -27,7 +27,16 @@
         android:theme="@style/Theme.Roblocks"
         android:usesCleartextTraffic="true"
         android:hardwareAccelerated="true"
-    tools:targetApi="31">
+        tools:targetApi="31">
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <meta-data
+            android:name="com.google.android.gms.credentials.api.SIGN_IN"
+            android:value="43154275218-8j4ls2aqn4gbqckdarngkpt50hqpg4mp.apps.googleusercontent.com"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -51,3 +60,4 @@
     </application>
 
 </manifest>
+

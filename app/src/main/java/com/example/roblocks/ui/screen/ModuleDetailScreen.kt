@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.roblocks.domain.viewModel.ModuleQuizViewModel
@@ -64,8 +65,9 @@ fun YoutubePlayer(videoUrl: String) {
 fun ModuleDetailScreen(
     navController: NavController,
     moduleId: String,
-    viewModel: ModuleQuizViewModel = viewModel()
 ) {
+    val viewModel : ModuleQuizViewModel = hiltViewModel()
+
     LaunchedEffect(moduleId) {
         viewModel.fetchModuleById(moduleId)
     }
