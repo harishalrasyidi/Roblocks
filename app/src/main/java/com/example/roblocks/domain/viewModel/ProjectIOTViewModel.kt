@@ -13,6 +13,7 @@ import androidx.room.BuiltInTypeConverters
 import com.example.roblocks.data.entities.ProjectIOTEntity
 import com.example.roblocks.domain.repository.ProjectIOTRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -316,8 +317,14 @@ class ProjectIOTViewModel @Inject constructor(
     }
 
     fun deleteProjectByID(id: String) {
-        viewModelScope.launch {
-            repository.deleteProjectByID(id)
+        Log.d("ProjectIOTViewModel", "deleteProjectByID called with id: $id")
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                repository.deleteProjectByID(id)
+                Log.d("ProjectIOTViewModel", "Requested delete for id: $id")
+            } catch (e: Exception) {
+                Log.e("ProjectIOTViewModel", "Delete failed", e)
+            }
         }
     }
 

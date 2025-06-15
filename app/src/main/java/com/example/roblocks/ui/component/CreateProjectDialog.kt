@@ -1,5 +1,6 @@
 package com.example.roblocks.ui.component
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -176,6 +177,7 @@ fun CardJenisProyek(
     projectType: String
 ) {
     var inputNamaProyek by remember { mutableStateOf(false) }
+    var showNoExampleAlert by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -235,7 +237,21 @@ fun CardJenisProyek(
 
                 }
             }
-
+            if (showNoExampleAlert) {
+                AlertDialog(
+                    onDismissRequest = { showNoExampleAlert = false },
+                    title = { Text("Informasi") },
+                    text = { Text("Oops, belum ada contoh proyek!") },
+                    confirmButton = {
+                        TextButton(onClick = { showNoExampleAlert = false }) {
+                            Text("OK")
+                        }
+                    },
+                    containerColor = Color.White,
+                    titleContentColor = Color(0xFF2F88FF),
+                    textContentColor = Color.Black
+                )
+            }
             Spacer(modifier = Modifier.size(8.dp))
 
             Row(
@@ -245,7 +261,9 @@ fun CardJenisProyek(
                 verticalAlignment = Alignment.Top
             ) {
                     Button(
-                        onClick = { /* TODO */ },
+                        onClick = {
+                            showNoExampleAlert = true
+                        },
                         colors = ButtonDefaults.buttonColors(Color(0xFFFF55A8)),
                         shape = RoundedCornerShape(50),
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
@@ -282,5 +300,6 @@ fun CardJenisProyek(
             }
         }
     }
+
 }
 
