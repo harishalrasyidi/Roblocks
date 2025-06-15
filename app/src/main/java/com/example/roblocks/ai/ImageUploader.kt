@@ -17,13 +17,12 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import com.example.roblocks.data.remote.BackendApiServiceClassifier
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-
-val sessionId = "session_test_debug"
 
 
 data class TrainingResponse(
@@ -47,10 +46,11 @@ data class MetricsHistory(
 
 class ImageUploader @Inject constructor(
     private val context: Context,
-    private val apiService: BackendApiService
+    private val apiService: BackendApiServiceClassifier
 ) {
     private companion object {
         const val MIN_IMAGES_PER_CLASS = 3
+        val sessionId = "session_test_debug"
     }
 
     private val okHttpClient = OkHttpClient.Builder()
@@ -108,7 +108,6 @@ class ImageUploader @Inject constructor(
                     imageIndex++
                 }
             }
-
             // Prepare class label parts (backend expects quoted strings)
             val classLabelParts = classLabels.map { label ->
                 MultipartBody.Part.createFormData("class_label", "\"$label\"")
@@ -154,7 +153,7 @@ class ImageUploader @Inject constructor(
             Log.d("ImageUploader", "Downloading model with sessionId: $sessionId")
             val response = apiService.downloadModel(sessionId = sessionId)
 
-            val responseBody = apiService.downloadModel(sessionId) // should return ResponseBody
+            val responseBody = apiService.downloadModel(sessionId)
 
             if (responseBody == null) {
                 Log.e("ImageUploader", "Response body is null")

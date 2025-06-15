@@ -18,8 +18,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.roblocks.R
+import com.example.roblocks.domain.viewModel.AuthViewModel
+import com.example.roblocks.domain.viewModel.RoblocksViewModel
 import com.example.roblocks.ui.BottomNavBar
 import com.example.roblocks.ui.component.FeatureCardWithRobot
 import com.example.roblocks.ui.component.TrackProgressCard
@@ -28,6 +31,9 @@ import com.example.roblocks.ui.component.TrackProgressCard
 fun MainScreen(navController: NavController) {
     val selectedIndex = remember { mutableStateOf(0) }
     var showExitDialog by remember { mutableStateOf(false) }
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val roblocksViewModel: RoblocksViewModel = hiltViewModel()
+    val user = authViewModel.getCurrentUser()
 
     Scaffold(
         bottomBar = {
@@ -58,9 +64,12 @@ fun MainScreen(navController: NavController) {
                 ) {
                     Column {
                         Text("Hello,", color = Color.Gray)
-                        Text("Simaju", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        Text(
+                            text = user?.displayName ?: user?.providerData?.firstOrNull { it.displayName != null }?.displayName ?: "User",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
                     }
-
 
                     IconButton(
                         onClick = { showExitDialog = true },
@@ -149,7 +158,16 @@ fun MainScreen(navController: NavController) {
                     },
                     confirmButton = {
                         TextButton(
-                            onClick = { Process.killProcess(Process.myPid()) }
+                            onClick = {
+                                authViewModel.signout()
+                                showExitDialog = false
+                                // Wait for signout to complete before navigating
+                                if (authViewModel.authState.value is AuthViewModel.AuthState.Unauthenticated) {
+                                    navController.navigate("login_screen") {
+                                        popUpTo("main_screen") { inclusive = true }
+                                    }
+                                }
+                            }
                         ) {
                             Text("Ya", color = Color(0xFFC8412A))
                         }
@@ -162,6 +180,21 @@ fun MainScreen(navController: NavController) {
                         }
                     }
                 )
+            }
+
+            // Add an observer for auth state changes
+            LaunchedEffect(authViewModel.authState) {
+                when (authViewModel.authState.value) {
+                    is AuthViewModel.AuthState.Unauthenticated -> {
+                        navController.navigate("login_screen") {
+                            popUpTo("main_screen") { inclusive = true }
+                        }
+                    }
+                    is AuthViewModel.AuthState.Error -> {
+                        // Handle error if needed
+                    }
+                    else -> {}
+                }
             }
         }
     }

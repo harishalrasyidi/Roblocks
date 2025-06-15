@@ -28,7 +28,9 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://10.10.193.199:5000\"")
+            buildConfigField("String", "BASE_URL", "\"https://roblocks.pythonanywhere.com\"")
+            buildConfigField("String", "CLASSIFIER_URL", "\"http://10.10.193.199:5000\"")
+
         }
         release {
             isMinifyEnabled = false
@@ -36,7 +38,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://your-production-url.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://roblocks.pythonanywhere.com\"")
+            buildConfigField("String", "CLASSIFIER_URL", "\"http://10.10.193.199:5000\"")
         }
     }
     compileOptions {
@@ -54,6 +57,12 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.androidx.navigation.runtime.android)
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -76,6 +85,8 @@ dependencies {
     //firebase
     implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation ("androidx.activity:activity-compose:1.9.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -102,10 +113,14 @@ dependencies {
 
     // TensorFlow Lite
 
-    implementation (libs.tensorflow.lite)
-    implementation (libs.tensorflow.lite.support)
-    implementation (libs.tensorflow.lite.metadata)
-    implementation (libs.tensorflow.lite.task.vision)
+//    implementation (libs.tensorflow.lite)
+//    implementation (libs.tensorflow.lite.support)
+//    implementation (libs.tensorflow.lite.metadata)
+//    implementation (libs.tensorflow.lite.task.vision)
+
+    implementation ("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
+    implementation ("org.tensorflow:tensorflow-lite-support:0.4.4")
+    implementation ("org.tensorflow:tensorflow-lite:2.16.1")
 
 
     // Coroutines
@@ -135,6 +150,18 @@ dependencies {
 
     //chart
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Google Sign In
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.firebase:firebase-auth-ktx")
+
+    implementation ("com.google.firebase:firebase-auth:22.3.1")
+    implementation ("com.google.android.gms:play-services-auth:20.7.0")
+
+    implementation ("androidx.credentials:credentials:<latest version>")
+    implementation ("androidx.credentials:credentials-play-services-auth:<latest version>")
+    implementation ("com.google.android.libraries.identity.googleid:googleid:<latest version>")
+
 }
 
 kapt {

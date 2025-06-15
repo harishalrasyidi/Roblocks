@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.roblocks.domain.viewModel.ModuleQuizViewModel
 
@@ -27,7 +28,7 @@ import com.example.roblocks.domain.viewModel.ModuleQuizViewModel
 fun QuizScreen(
     navController: NavController,
     moduleId: String,
-    viewModel: ModuleQuizViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: ModuleQuizViewModel = hiltViewModel()
 ) {
     LaunchedEffect(moduleId) {
         viewModel.fetchQuestions(moduleId)
